@@ -11,5 +11,5 @@ This will create a new virtual environment named "env"
     source env/bin/activate
 This will place you in the virtual env
 
-#To get out:
+# To get out:
     deactivate
