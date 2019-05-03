@@ -1,15 +1,15 @@
 from typing import Dict, Any, Union, Tuple
 from flask import Flask
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, http_status_message, reqparse
 import pymysql.cursors
-from flask_jsonpify import jsonify , request
+from flask_jsonpify import jsonify, request
 from datetime import datetime
-from flask_restful import http_status_message
+
 app = Flask(__name__)
 api = Api(app)
 db_connect = pymysql.connect(host='127.0.0.1',
                              user='root',
-                             password='test',
+                             password='rootroot',
                              db='mydb',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
@@ -19,7 +19,7 @@ class GetUsers(Resource):
     def get(self):
         try:
             with db_connect.cursor() as users:
-                query = "select id, username, created_at, email from user"
+                query = "SELECT id, username, created_at, email from user"
                 users.execute(query)
                 result = {'Message ': 'OK', 'data': users.fetchall(), 'pager': {'current': 'un chiffre', 'total': "cb"}}
         finally:
@@ -27,45 +27,64 @@ class GetUsers(Resource):
 
 
 class CreateUser(Resource):
-   def post(self):
-       date = datetime.now()
-       date_str = datetime.strftime(date, '%Y-%m-%d')
-       try:
-           with db_connect.cursor() as newUser:
-               query = "insert into user (username, email, pseudo, password, created_at) values ('aryaStark', 'aryaS@yahoo.fr', 'AryaMastermind', 'teste98', '{}')" .format(date_str)
-               newUser.execute(query)
-               db_connect.commit()
-               http_status_message(201)
-               result = {"Message": 'OK', 'data': '...'}
-       except Exception as e:
-           db_connect.rollback()
-           return {'error': str(e)}
-       finally:
-           return jsonify(result)
+    def get_timestamp(self):
+        return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
+
+    def post(self):
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('username', type=str, help='Username to create user')
+            parser.add_argument('email', type=str, help='Email address to create user')
+            parser.add_argument('pseudo', type=str, help='Pseudo to create user')
+            parser.add_argument('password', type=str, help='Password to create user')
+            args = parser.parse_args()
+
+            _userUsername = args['username']
+            _userEmail = args['email']
+            _userPseudo = args['pseudo']
+            _userPassword = args['password']
+
+            with db_connect.cursor() as newUser:
+                query = "INSERT INTO user (username, email, pseudo, password, created_at) VALUES ('%s', '%s', '%s', '%s', '%s')" % (_userUsername, _userEmail, _userPseudo, _userPassword, self.get_timestamp())
+                newUser.execute(query)
+                db_connect.commit()
+                http_status_message(201)
+                result = {"Message": 'ok', 'data': '...'}, 201
+        except Exception as e:
+            db_connect.rollback()
+            return {'error': str(e)}
+        finally:
+            return jsonify(result)
 
 
 class UserById(Resource):
     def get(self, user_id):
         try:
             with db_connect.cursor() as cursor:
-                query = "select id, username, created_at, email from user where id= {}".format(user_id)
+                query = "SELECT id, username, created_at, email FROM user WHERE id= {}".format(user_id)
                 cursor.execute(query)
                 result = {'Message ': 'OK', 'data': cursor.fetchall()}
         finally:
             return jsonify(result)
 
-
     def put(self, user_id):
-        name = "dy"
-        mail = "modif@gmail.com"
-        psdo = "psyyy"
-        passwd = "190998"
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str, help='Username to create user')
+        parser.add_argument('email', type=str, help='Email address to create user')
+        parser.add_argument('pseudo', type=str, help='Pseudo to create user')
+        parser.add_argument('password', type=str, help='Password to create user')
+        args = parser.parse_args()
+
+        _userUsername = args['username']
+        _userEmail = args['email']
+        _userPseudo = args['pseudo']
+        _userPassword = args['password']
         try:
             with db_connect.cursor() as newUser:
-                query = "update user set username = {}, email = {}, pseudo = {}, password = {} where id = {}".format(name, mail, psdo, passwd, user_id)
+                query = "UPDATE user set username = '%s', email = '%s', pseudo = '%s', password = '%s' where id = '%s'" % (_userUsername, _userEmail, _userPseudo, _userPassword, user_id)
                 newUser.execute(query)
                 db_connect.commit()
-                http_status_message(201)
+                http_status_message(200)
                 result = {"Message": 'OK', 'data': '...'}
         except Exception as e:
             db_connect.rollback()
@@ -78,8 +97,9 @@ class DeleteUserById(Resource):
     def delete(self, user_id):
         try:
             with db_connect.cursor() as user:
-                query = "delete from user where id = {}".format(user_id)
+                query = "DELETE from user where id = {}".format(user_id)
                 user.execute(query)
                 result = {'Message ': 'OK'}
         finally:
             return jsonify(result)
+
