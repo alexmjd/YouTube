@@ -1,6 +1,6 @@
 from typing import Dict, Any, Union, Tuple
 from flask import Flask
-from flask_restful import Resource, Api, http_status_message, reqparse
+from flask_restful import Resource, Api, http_status_message, reqparse, marshal
 import pymysql.cursors
 from flask_jsonpify import jsonify, request
 from datetime import datetime
@@ -9,11 +9,20 @@ app = Flask(__name__)
 api = Api(app)
 db_connect = pymysql.connect(host='127.0.0.1',
                              user='root',
-                             password='rootroot',
+                             password='test',
                              db='mydb',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
 
+
+def getIdByPseudo(pseudo):
+    try:
+        with db_connect.cursor() as cursor:
+            query = "SELECT id FROM user WHERE pseudo= {}".format(pseudo)
+            cursor.execute(query)
+            result = cursor.fetchall()
+    finally:
+        return result
 
 class GetUsers(Resource):
     def get(self):
@@ -45,16 +54,16 @@ class CreateUser(Resource):
             _userPassword = args['password']
 
             with db_connect.cursor() as newUser:
-                query = "INSERT INTO user (username, email, pseudo, password, created_at) VALUES ('%s', '%s', '%s', '%s', '%s')" % (_userUsername, _userEmail, _userPseudo, _userPassword, self.get_timestamp())
+                query = "INSERT INTO user (username, email, pseudo, password, created_at) VALUES ('{}', '{}', '{}', '{}', '{}')".format(_userUsername, _userEmail, _userPseudo, _userPassword, self.get_timestamp())
                 newUser.execute(query)
                 db_connect.commit()
-                http_status_message(201)
-                result = {"Message": 'ok', 'data': '...'}, 201
+                result = {"Message": 'ok', 'data': { 'id' : '', 'username' : _userUsername, 'created_at' : self.get_timestamp(), 'email' : _userEmail}}, 201
+
         except Exception as e:
             db_connect.rollback()
             return {'error': str(e)}
         finally:
-            return jsonify(result)
+            return result
 
 
 class UserById(Resource):
@@ -81,10 +90,9 @@ class UserById(Resource):
         _userPassword = args['password']
         try:
             with db_connect.cursor() as newUser:
-                query = "UPDATE user set username = '%s', email = '%s', pseudo = '%s', password = '%s' where id = '%s'" % (_userUsername, _userEmail, _userPseudo, _userPassword, user_id)
+                query = "UPDATE user set username = '{}', email = '{}', pseudo = '{}', password = '{}' where id = '{}'".format(_userUsername, _userEmail, _userPseudo, _userPassword, user_id)
                 newUser.execute(query)
                 db_connect.commit()
-                http_status_message(200)
                 result = {"Message": 'OK', 'data': '...'}
         except Exception as e:
             db_connect.rollback()
@@ -99,7 +107,6 @@ class DeleteUserById(Resource):
             with db_connect.cursor() as user:
                 query = "DELETE from user where id = {}".format(user_id)
                 user.execute(query)
-                result = {'Message ': 'OK'}
         finally:
-            return jsonify(result)
+            return {}, 204
 
