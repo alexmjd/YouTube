@@ -1,5 +1,5 @@
 from typing import Dict, Any, Union, Tuple
-from flask import Flask
+from flask import Flask, abort
 from flask_restful import Resource, Api, http_status_message, reqparse, marshal
 import pymysql.cursors
 from flask_jsonpify import jsonify, request
@@ -20,9 +20,11 @@ def getIdByPseudo(pseudo):
         with db_connect.cursor() as cursor:
             query = "SELECT id FROM user WHERE pseudo= {}".format(pseudo)
             cursor.execute(query)
-            result = cursor.fetchall()
+            result = cursor.fetchone()
+            print(result)
     finally:
         return result
+
 
 class GetUsers(Resource):
     def get(self):
@@ -57,8 +59,7 @@ class CreateUser(Resource):
                 query = "INSERT INTO user (username, email, pseudo, password, created_at) VALUES ('{}', '{}', '{}', '{}', '{}')".format(_userUsername, _userEmail, _userPseudo, _userPassword, self.get_timestamp())
                 newUser.execute(query)
                 db_connect.commit()
-                result = {"Message": 'ok', 'data': { 'id' : '', 'username' : _userUsername, 'created_at' : self.get_timestamp(), 'email' : _userEmail}}, 201
-
+                result = {"Message": 'ok', 'data' : '...'}, 201
         except Exception as e:
             db_connect.rollback()
             return {'error': str(e)}
@@ -68,13 +69,13 @@ class CreateUser(Resource):
 
 class UserById(Resource):
     def get(self, user_id):
-        try:
-            with db_connect.cursor() as cursor:
-                query = "SELECT id, username, created_at, email FROM user WHERE id= {}".format(user_id)
-                cursor.execute(query)
-                result = {'Message ': 'OK', 'data': cursor.fetchall()}
-        finally:
-            return jsonify(result)
+        with db_connect.cursor() as cursor:
+            query = "SELECT id, username, created_at, email FROM user WHERE id= {}".format(user_id)
+            if cursor.execute(query) == 1:
+                return jsonify({'Message ': 'OK', 'data': cursor.fetchall()})
+            else:
+                return abort(404, "not found")
+
 
     def put(self, user_id):
         parser = reqparse.RequestParser()
@@ -88,25 +89,22 @@ class UserById(Resource):
         _userEmail = args['email']
         _userPseudo = args['pseudo']
         _userPassword = args['password']
-        try:
-            with db_connect.cursor() as newUser:
-                query = "UPDATE user set username = '{}', email = '{}', pseudo = '{}', password = '{}' where id = '{}'".format(_userUsername, _userEmail, _userPseudo, _userPassword, user_id)
-                newUser.execute(query)
+        with db_connect.cursor() as newUser:
+            query = "UPDATE user set username = '{}', email = '{}', pseudo = '{}', password = '{}' where id = '{}'".format(_userUsername, _userEmail, _userPseudo, _userPassword, user_id)
+            if newUser.execute(query) == 1:
                 db_connect.commit()
-                result = {"Message": 'OK', 'data': '...'}
-        except Exception as e:
-            db_connect.rollback()
-            return {'error': str(e)}
-        finally:
-            return jsonify(result)
+                return {"Message": 'OK', 'data': '...'}
+            else:
+                abort(404, "not found")
 
 
 class DeleteUserById(Resource):
     def delete(self, user_id):
-        try:
-            with db_connect.cursor() as user:
-                query = "DELETE from user where id = {}".format(user_id)
-                user.execute(query)
-        finally:
-            return {}, 204
+        with db_connect.cursor() as user:
+             query = "DELETE from user where id = {}".format(user_id)
+             if user.execute(query) == 1:
+                db_connect.commit()
+                return {}, 204
+             else:
+                 abort(404, "not found")
 
