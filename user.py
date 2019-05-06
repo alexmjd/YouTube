@@ -61,7 +61,7 @@ class UserById(Resource):
         with db_connect.cursor() as cursor:
             query = "SELECT id, username, created_at, email FROM user WHERE id= {}".format(user_id)
             if cursor.execute(query) == 1:
-                return jsonify({'Message': 'OK', 'data': cursor.fetchall()})
+                return jsonify({'Message': 'OK', 'data': cursor.fetchone()})
             else:
                 return abort(404, "not found")
 
