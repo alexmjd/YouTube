@@ -1,5 +1,5 @@
 from typing import Dict, Any, Union, Tuple
-from flask import Flask, abort
+from flask import Flask, abort, make_response
 from flask_restful import Resource, Api, http_status_message, reqparse, marshal
 import pymysql.cursors
 from flask_jsonpify import jsonify, request
@@ -53,7 +53,7 @@ class CreateUser(Resource):
                 query = "INSERT INTO user (username, email, pseudo, password, created_at) VALUES ('{}', '{}', '{}', '{}', '{}')".format(_userUsername, _userEmail, _userPseudo, _userPassword, self.get_timestamp())
                 newUser.execute(query)
                 db_connect.commit()
-                return {"Message": 'ok', 'data': '...'}, 201
+                return make_response(jsonify({"Message": 'ok', 'data': '...'}), 201)
 
 
 class UserById(Resource):
@@ -82,7 +82,7 @@ class UserById(Resource):
             query = "UPDATE user set username = '{}', email = '{}', pseudo = '{}', password = '{}' where id = '{}'".format(_userUsername, _userEmail, _userPseudo, _userPassword, user_id)
             if newUser.execute(query) == 1:
                 db_connect.commit()
-                return {"Message": 'OK', 'data': '...'}
+                return make_response(jsonify({"Message": 'OK', 'data': '...'}))
             else:
                 abort(404, "not found")
 
@@ -111,7 +111,7 @@ class Authentification(Resource):
             query = "SELECT id, username, created_at, email, pseudo FROM user WHERE email='{}' and password='{}'".format(mail, passwd)
             if authenti.execute(query) == 1:
                 db_connect.commit()
-                return {"Message": 'OK', 'token': authenti.fetchall()}, 201
+                return make_response(jsonify({"Message": 'OK', 'token': authenti.fetchall()}), 201)
             else:
                 abort(404, "not found")
 
