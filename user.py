@@ -9,7 +9,7 @@ app = Flask(__name__)
 api = Api(app)
 db_connect = pymysql.connect(host='127.0.0.1',
                              user='root',
-                             password='rootroot',
+                             password='test',
                              db='mydb',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
@@ -27,7 +27,7 @@ def getIdByPseudo(pseudo):
 class GetUsers(Resource):
     def get(self):
         with db_connect.cursor() as users:
-            query = "SELECT id, username, created_at, email from user"
+            query = "SELECT id, username, created_at, email, pseudo from user"
             users.execute(query)
             result = {'Message ': 'OK', 'data': users.fetchall(), 'pager': {'current': 'un chiffre', 'total': "cb"}}
             return jsonify(result)
@@ -59,7 +59,7 @@ class CreateUser(Resource):
 class UserById(Resource):
     def get(self, user_id):
         with db_connect.cursor() as cursor:
-            query = "SELECT id, username, created_at, email FROM user WHERE id= {}".format(user_id)
+            query = "SELECT id, username, created_at, email, pseudo FROM user WHERE id= {}".format(user_id)
             if cursor.execute(query) == 1:
                 return jsonify({'Message': 'OK', 'data': cursor.fetchone()})
             else:
@@ -94,6 +94,24 @@ class DeleteUserById(Resource):
             if user.execute(query) == 1:
                 db_connect.commit()
                 return {}, 204
+            else:
+                abort(404, "not found")
+
+
+class Authentification(Resource):
+    def post(self):
+        auth = reqparse.RequestParser()
+        auth.add_argument('email', type=str, required=True, help="email")
+        auth.add_argument('password', type=str, required=True, help="password")
+        args = auth.parse_args()
+
+        mail = args['email']
+        passwd = args['password']
+        with db_connect.cursor() as authenti:
+            query = "SELECT id, username, created_at, email, pseudo FROM user WHERE email='{}' and password='{}'".format(mail, passwd)
+            if authenti.execute(query) == 1:
+                db_connect.commit()
+                return {"Message": 'OK', 'token': authenti.fetchall()}, 201
             else:
                 abort(404, "not found")
 
