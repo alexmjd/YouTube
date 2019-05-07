@@ -34,8 +34,6 @@ services :
     networks:
       - default
 
-  
-
 # Permet l'établissement d'un réseau, lequel sera donné à chaque service
 networks:
   default:
