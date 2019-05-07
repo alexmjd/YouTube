@@ -24,8 +24,7 @@ services :
       dockerfile: Dockerfile_python
     image: py_api:latest
     container_name: t_python
-    command: bash -c "sleep 25; python3 app.py;"
-    restart: on-failure
+    restart: always
     depends_on: 
       - db
     ports:
