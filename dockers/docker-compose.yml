@@ -22,7 +22,9 @@ services :
     build:
       context: ./python
       dockerfile: Dockerfile_python
+    image: py_api:latest
     container_name: t_python
+    command: bash -c "sleep 5"
     depends_on: 
       - db
     ports:

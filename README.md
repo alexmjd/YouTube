@@ -13,3 +13,9 @@ This will place you in the virtual env
 
 ## To get out:
     deactivate
+
+
+# The docker :
+    docker-compose up --build -d
+This will build images and run dockers, you may rerun this command if the t_python docker isn't up when running docker ps -a
+
