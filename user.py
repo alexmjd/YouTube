@@ -1,12 +1,10 @@
-from typing import Dict, Any, Union, Tuple
-from flask import Flask, abort, make_response
-from flask_restful import Resource, Api, http_status_message, reqparse, marshal
 import pymysql.cursors
-from flask_jsonpify import jsonify, request
+import error
+from flask import Flask, abort, make_response
+from flask_restful import Resource,  reqparse
+from flask_jsonpify import jsonify
 from datetime import datetime
 
-app = Flask(__name__)
-api = Api(app)
 db_connect = pymysql.connect(host='127.0.0.1',
                              user='root',
                              password='test',
@@ -29,8 +27,7 @@ class GetUsers(Resource):
         with db_connect.cursor() as users:
             query = "SELECT id, username, created_at, email, pseudo from user"
             users.execute(query)
-            result = {'Message ': 'OK', 'data': users.fetchall(), 'pager': {'current': 'un chiffre', 'total': "cb"}}
-            return jsonify(result)
+            return make_response(jsonify({'Message ': 'OK', 'data': users.fetchall(), 'pager': {'current': 'un chiffre', 'total': "cb"}}))
 
 
 class CreateUser(Resource):
@@ -41,7 +38,7 @@ class CreateUser(Resource):
             parser = reqparse.RequestParser()
             parser.add_argument('username', type=str, required=True, help='Username to create user')
             parser.add_argument('email', type=str, required=True, help='Email address to create user')
-            parser.add_argument('pseudo', type=str, required=True, help='Pseudo to create user')
+            parser.add_argument('pseudo', type=str, help='Pseudo to create user')
             parser.add_argument('password', type=str, required=True, help='Password to create user')
             args = parser.parse_args()
 
@@ -59,12 +56,12 @@ class CreateUser(Resource):
 class UserById(Resource):
     def get(self, user_id):
         with db_connect.cursor() as cursor:
+            id = error.ifInt(user_id)
             query = "SELECT id, username, created_at, email, pseudo FROM user WHERE id= {}".format(user_id)
-            if cursor.execute(query) == 1:
-                return jsonify({'Message': 'OK', 'data': cursor.fetchone()})
+            if id == len(user_id) and cursor.execute(query) == 1:
+                return make_response(jsonify({'Message': 'OK', 'data': cursor.fetchone()}))
             else:
-                return abort(404, "not found")
-
+                return abort(404,  "Not found")
 
     def put(self, user_id):
         parser = reqparse.RequestParser()
@@ -79,23 +76,25 @@ class UserById(Resource):
         _userPseudo = args['pseudo']
         _userPassword = args['password']
         with db_connect.cursor() as newUser:
+            id = error.ifInt(user_id)
             query = "UPDATE user set username = '{}', email = '{}', pseudo = '{}', password = '{}' where id = '{}'".format(_userUsername, _userEmail, _userPseudo, _userPassword, user_id)
-            if newUser.execute(query) == 1:
+            if id == len(user_id) and newUser.execute(query) == 1:
                 db_connect.commit()
                 return make_response(jsonify({"Message": 'OK', 'data': '...'}))
             else:
-                abort(404, "not found")
+                abort(404, "Not found")
 
 
 class DeleteUserById(Resource):
     def delete(self, user_id):
         with db_connect.cursor() as user:
+            id = error.ifInt(user_id) # if all of chars is int, return the same len than user id
             query = "DELETE from user where id = {}".format(user_id)
-            if user.execute(query) == 1:
+            if id == len(user_id) and user.execute(query) == 1:
                 db_connect.commit()
                 return {}, 204
             else:
-                abort(404, "not found")
+                abort(404, "Not found")
 
 
 class Authentification(Resource):
@@ -113,5 +112,5 @@ class Authentification(Resource):
                 db_connect.commit()
                 return make_response(jsonify({"Message": 'OK', 'token': authenti.fetchall()}), 201)
             else:
-                abort(404, "not found")
+                abort(404, "Not found")
 
