@@ -7,7 +7,7 @@ from datetime import datetime
 
 db_connect = pymysql.connect(host='127.0.0.1',
                              user='root',
-                             password='test',
+                             password='rootroot',
                              db='mydb',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
@@ -36,27 +36,34 @@ class CreateUser(Resource):
 
     def post(self):
             parser = reqparse.RequestParser()
-            parser.add_argument('username', type=str, required=True, help='Username to create user')
-            parser.add_argument('email', type=str, required=True, help='Email address to create user')
+            parser.add_argument('username', type=str, help='Username to create user')
+            parser.add_argument('email', type=str, help='Email address to create user')
             parser.add_argument('pseudo', type=str, help='Pseudo to create user')
-            parser.add_argument('password', type=str, required=True, help='Password to create user')
+            parser.add_argument('password', type=str, help='Password to create user')
             args = parser.parse_args()
 
             _userUsername = args['username']
             _userEmail = args['email']
             _userPseudo = args['pseudo']
             _userPassword = args['password']
-            with db_connect.cursor() as newUser:
-                query = "INSERT INTO user (username, email, pseudo, password, created_at) VALUES ('{}', '{}', '{}', '{}', '{}')".format(_userUsername, _userEmail, _userPseudo, _userPassword, self.get_timestamp())
-                newUser.execute(query)
-                db_connect.commit()
-                return make_response(jsonify({"Message": 'ok', 'data': '...'}), 201)
+
+            if _userUsername and _userEmail and _userPassword is not None:
+                with db_connect.cursor() as newUser:
+                    query = "INSERT INTO user (username, email, pseudo, password, created_at) VALUES ('{}', '{}', '{}', '{}', '{}')".format(
+                        _userUsername, _userEmail, _userPseudo, _userPassword, self.get_timestamp())
+                    newUser.execute(query)
+                    db_connect.commit()
+                    return make_response(UserById.get(self, str(newUser.lastrowid)), 201)
+            else:
+                return error.ifIsNone(10001, "Veuillez remplir tous les champs obligatoire!")
+
+
 
 
 class UserById(Resource):
     def get(self, user_id):
         with db_connect.cursor() as cursor:
-            id = error.ifInt(user_id)
+            id = error.ifIsInt(user_id)
             query = "SELECT id, username, created_at, email, pseudo FROM user WHERE id= {}".format(user_id)
             if id == len(user_id) and cursor.execute(query) == 1:
                 return make_response(jsonify({'Message': 'OK', 'data': cursor.fetchone()}))
@@ -65,30 +72,34 @@ class UserById(Resource):
 
     def put(self, user_id):
         parser = reqparse.RequestParser()
-        parser.add_argument('username', type=str, required = True, help='Username to update user')
-        parser.add_argument('email', type=str, required = True, help='Email address to update user')
-        parser.add_argument('pseudo', type=str, required = True, help='Pseudo to update user')
-        parser.add_argument('password', type=str, required = True, help='Password to update user')
+        parser.add_argument('username', type=str, help='Username to update user')
+        parser.add_argument('email', type=str, help='Email address to update user')
+        parser.add_argument('pseudo', type=str, help='Pseudo to update user')
+        parser.add_argument('password', type=str, help='Password to update user')
         args = parser.parse_args()
 
         _userUsername = args['username']
         _userEmail = args['email']
         _userPseudo = args['pseudo']
         _userPassword = args['password']
-        with db_connect.cursor() as newUser:
-            id = error.ifInt(user_id)
-            query = "UPDATE user set username = '{}', email = '{}', pseudo = '{}', password = '{}' where id = '{}'".format(_userUsername, _userEmail, _userPseudo, _userPassword, user_id)
-            if id == len(user_id) and newUser.execute(query) == 1:
-                db_connect.commit()
-                return make_response(jsonify({"Message": 'OK', 'data': '...'}))
-            else:
-                abort(404, "Not found")
+
+        if _userUsername and _userEmail and _userPassword and _userPassword is not None:
+            with db_connect.cursor() as newUser:
+                id = error.ifIsInt(user_id)
+                query = "UPDATE user set username = '{}', email = '{}', pseudo = '{}', password = '{}' where id = '{}'".format(_userUsername, _userEmail, _userPseudo, _userPassword, user_id)
+                if id == len(user_id) and newUser.execute(query) == 1:
+                    db_connect.commit()
+                    return self.get(user_id)
+                else:
+                    abort(404, "Not found")
+        else:
+            return error.ifIsNone(10001, "Veuillez à ne pas laisser les champs vides!")
 
 
 class DeleteUserById(Resource):
     def delete(self, user_id):
         with db_connect.cursor() as user:
-            id = error.ifInt(user_id) # if all of chars is int, return the same len than user id
+            id = error.ifIsInt(user_id) # if all of chars is int, return the same len than user id
             query = "DELETE from user where id = {}".format(user_id)
             if id == len(user_id) and user.execute(query) == 1:
                 db_connect.commit()
