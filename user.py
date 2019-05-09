@@ -4,6 +4,9 @@ from flask import abort, make_response
 from flask_restful import Resource,  reqparse
 from flask_jsonpify import jsonify
 from datetime import datetime
+from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required
+                                , jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+
 
 db_connect = include.db_connect()
 
@@ -32,6 +35,7 @@ class CreateUser(Resource):
     def get_timestamp(self):
         return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
 
+    @jwt_required
     def post(self):
             parser = reqparse.RequestParser()
             parser.add_argument('username', type=str, help='Username to create user')
@@ -111,11 +115,14 @@ class Authentification(Resource):
 
         user = args['username']
         passwd = args['password']
-        print(passwd)
+        access_token = create_access_token(identity=user)
+        refresh_token = create_refresh_token(identity=user)
         with db_connect.cursor() as authenti:
-            query = "SELECT id, username, created_at, email, pseudo FROM user WHERE username ='{}' and password='{}'".format(user, passwd)
+            query = "SELECT id, username, created_at, email, pseudo FROM user WHERE username ='{}' and password='{}'".format(
+                user, passwd)
             if authenti.execute(query) == 1:
                 db_connect.commit()
-                return make_response(jsonify({"Message": 'OK', 'data': {'token': '..', 'user': authenti.fetchall()}}), 201)
+                return make_response(
+                    jsonify({"Message": 'OK', 'data': {'token': access_token, 'user': authenti.fetchall()}}), 201)
             else:
                 abort(404, "Not found")
