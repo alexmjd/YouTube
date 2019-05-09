@@ -13,7 +13,6 @@ def not_found(error):
 
 # partie user
 api.add_resource(user.GetUsers, '/users')
-api.add_resource(user.DeleteUserById, '/users/<user_id>')
 api.add_resource(user.UserById, '/user/<user_id>')
 api.add_resource(user.CreateUser, '/user')
 api.add_resource(user.Authentification, '/auth')

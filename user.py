@@ -79,8 +79,6 @@ class UserById(Resource):
         else:
             return error.ifIsNone(10001, "Veuillez à ne pas laisser les champs vides!")
 
-
-class DeleteUserById(Resource):
     def delete(self, user_id):
         with db_connect.cursor() as user:
             id = error.ifIsInt(user_id) # if all of chars is int, return the same len than user id
@@ -95,17 +93,17 @@ class DeleteUserById(Resource):
 class Authentification(Resource):
     def post(self):
         auth = reqparse.RequestParser()
-        auth.add_argument('email', type=str, required=True, help="email")
+        auth.add_argument('username', type=str, required=True, help="user")
         auth.add_argument('password', type=str, required=True, help="password")
         args = auth.parse_args()
 
-        mail = args['email']
+        user = args['username']
         passwd = args['password']
+        print(passwd)
         with db_connect.cursor() as authenti:
-            query = "SELECT id, username, created_at, email, pseudo FROM user WHERE email='{}' and password='{}'".format(mail, passwd)
+            query = "SELECT id, username, created_at, email, pseudo FROM user WHERE username ='{}' and password='{}'".format(user, passwd)
             if authenti.execute(query) == 1:
                 db_connect.commit()
-                return make_response(jsonify({"Message": 'OK', 'token': authenti.fetchall()}), 201)
+                return make_response(jsonify({"Message": 'OK', 'data': {'token': '..', 'user': authenti.fetchall()}}), 201)
             else:
                 abort(404, "Not found")
-
