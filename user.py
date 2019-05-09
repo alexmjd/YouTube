@@ -9,11 +9,23 @@ db_connect = include.db_connect()
 
 
 class GetUsers(Resource):
-    def get(self):
-        with db_connect.cursor() as users:
-            query = "SELECT id, username, created_at, email, pseudo from user"
-            users.execute(query)
-            return make_response(jsonify({'Message ': 'OK', 'data': users.fetchall(), 'pager': {'current': 'un chiffre', 'total': "cb"}}))
+        def get(self):
+            parser = reqparse.RequestParser()
+            parser.add_argument('pseudo', type=str)
+            parser.add_argument('page', type=str)
+            parser.add_argument('perPage', type=str)
+            args = parser.parse_args()
+
+            _userPseudo = args['pseudo'] if args['pseudo'] else ''
+            _page = int(args['page']) if args['page'] and args['page'] is not "0" and args['page'].isdigit() else 1
+            _perPage = int(args['perPage']) if args['perPage'] and args['perPage'] is not "0" and args['perPage'].isdigit() else 50
+
+            limit = _perPage * _page - _perPage
+
+            with db_connect.cursor() as users:
+                query = "SELECT id, username, created_at, email, pseudo from user WHERE pseudo LIKE '%{}%' ORDER BY pseudo LIMIT {}, {}".format(_userPseudo, limit, _perPage)
+                users.execute(query)
+                return make_response(jsonify({'Message ': 'OK', 'data': users.fetchall(), 'pager': {'current': _page, 'total': users.rowcount}}))
 
 
 class CreateUser(Resource):
