@@ -1,25 +1,11 @@
-import pymysql.cursors
+import include
 import error
-from flask import Flask, abort, make_response
+from flask import abort, make_response
 from flask_restful import Resource,  reqparse
 from flask_jsonpify import jsonify
 from datetime import datetime
 
-db_connect = pymysql.connect(host='127.0.0.1',
-                             user='root',
-                             password='rootroot',
-                             db='mydb',
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
-
-
-def getIdByPseudo(pseudo):
-    with db_connect.cursor() as cursor:
-        query = "SELECT id FROM user WHERE pseudo= {}".format(pseudo)
-        cursor.execute(query)
-        result = cursor.fetchone()
-        print(result)
-        return result
+db_connect = include.db_connect()
 
 
 class GetUsers(Resource):
@@ -56,8 +42,6 @@ class CreateUser(Resource):
                     return make_response(UserById.get(self, str(newUser.lastrowid)), 201)
             else:
                 return error.ifIsNone(10001, "Veuillez remplir tous les champs obligatoire!")
-
-
 
 
 class UserById(Resource):
