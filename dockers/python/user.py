@@ -7,9 +7,9 @@ from datetime import datetime
 
 app = Flask(__name__)
 api = Api(app)
-db_connect = pymysql.connect(host='127.0.0.1',
+db_connect = pymysql.connect(host='t_db',
                              user='root',
-                             password='rootroot',
+                             password='root',
                              db='mydb',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)

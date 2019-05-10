@@ -1,6 +1,12 @@
 # YouTube
 Etna_Youtube_Api
 
+# The docker :
+    dockers/regen.sh 
+This script will stop and destroy containers, build images if they don't exist and run dockers
+
+
+
 # Virtual env : 
 
 ## With python3, juste type:
