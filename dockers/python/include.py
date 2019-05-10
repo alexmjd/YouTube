@@ -3,7 +3,7 @@ import pymysql.cursors
 
 # conn to db
 def db_connect():
-    return pymysql.connect(host='localhost',
+    return pymysql.connect(host='t_db',
                            user='user',
                            password='pass',
                            db='mydb',

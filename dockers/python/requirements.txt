@@ -5,3 +5,4 @@ flask_restful
 pymysql
 flask_jsonpify
 cryptography
+flask_jwt_extended
