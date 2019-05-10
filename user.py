@@ -35,7 +35,6 @@ class CreateUser(Resource):
     def get_timestamp(self):
         return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
 
-    @jwt_required
     def post(self):
             parser = reqparse.RequestParser()
             parser.add_argument('username', type=str, help='Username to create user')
@@ -125,4 +124,4 @@ class Authentification(Resource):
                 return make_response(
                     jsonify({"Message": 'OK', 'data': {'token': access_token, 'user': authenti.fetchall()}}), 201)
             else:
-                abort(404, "Not found")
+                return error.ifIsNone(10001, "identifiant ou mot de passe invalide!")
