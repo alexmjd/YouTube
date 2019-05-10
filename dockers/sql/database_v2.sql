@@ -124,6 +124,6 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
-insert into user values (1, 'toto', 'toto@toto.fr', null, 'password', now());
-insert into user values (2, 'titi', 'titi@titi.fr', null, 'test', now());
-insert into user values (3, 'tata', 'tata@tata.fr', null, 'plop', now());
+insert into user values (1, 'toto', 'toto@toto.fr', "truc", 'password', now());
+insert into user values (2, 'titi', 'titi@titi.fr', "bidul", 'test', now());
+insert into user values (3, 'tata', 'tata@tata.fr', "chouette", 'plop', now());
