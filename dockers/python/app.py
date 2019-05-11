@@ -1,4 +1,5 @@
 import user
+import comment
 from flask import Flask, make_response, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
@@ -20,7 +21,8 @@ api.add_resource(user.GetUsers, '/users')
 api.add_resource(user.UserById, '/user/<user_id>')
 api.add_resource(user.CreateUser, '/user')
 api.add_resource(user.Authentification, '/auth')
+api.add_resource(comment.GetComments, '/video/<video_id>/comments')
 
 
 if __name__ == '__main__':
-        app.run(host="0.0.0.0", port=5000)
+    app.run()
