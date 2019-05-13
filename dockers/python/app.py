@@ -22,9 +22,15 @@ api.add_resource(user.GetUsers, '/users')
 api.add_resource(user.UserById, '/user/<user_id>')
 api.add_resource(user.CreateUser, '/user')
 api.add_resource(user.Authentification, '/auth')
+
+# Partie commentaires
 api.add_resource(comment.GetComments, '/video/<video_id>/comments')
+
+# Partie vidéo
 api.add_resource(video.GetVideos, '/videos')
 api.add_resource(video.GetVideoById, '/video/<video_id>')
+api.add_resource(video.GetVideosByIdUser, '/user/<user_id>/videos')
+api.add_resource(video.CreateVideo, '/user/<user_id>/video')
 
 
 if __name__ == '__main__':
