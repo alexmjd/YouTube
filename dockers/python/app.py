@@ -24,6 +24,7 @@ api.add_resource(user.CreateUser, '/user')
 api.add_resource(user.Authentification, '/auth')
 api.add_resource(comment.GetComments, '/video/<video_id>/comments')
 api.add_resource(video.GetVideos, '/videos')
+api.add_resource(video.GetVideoById, '/video/<video_id>')
 
 
 if __name__ == '__main__':
