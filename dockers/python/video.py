@@ -1,5 +1,7 @@
 import include
 import error
+import upload
+import logging
 from flask import abort, make_response
 from flask_restful import Resource, reqparse
 from datetime import datetime
@@ -9,7 +11,6 @@ db_connect = include.db_connect()
 
 class GetVideos(Resource):
     def get(self):
-        list = []
         with db_connect.cursor() as video:
             query = "SELECT * FROM video"
             video.execute(query)
@@ -26,8 +27,13 @@ class CreateVideo(Resource):
             parser.add_argument('source', type=str, help='file of the video')
             args = parser.parse_args()
 
+            uploader = upload.Upload()
+
             _name = args['name']
-            _source = args['source']
+            _source = uploader.upload_file()
+
+            logging.warning(_source)
+            #_source = args['source']
 
             if _name and _source is not None:
                 with db_connect.cursor() as video:
