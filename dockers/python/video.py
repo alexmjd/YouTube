@@ -55,8 +55,26 @@ class GetVideoById(Resource):
                 return abort(404,  "Not found")
 
     def put(self, video_id):
-        with db_connect.cursor() as video:
-            return 0
+        parser = reqparse.RequestParser()
+        parser.add_argument('name', type=str, help='Name of the video')
+        parser.add_argument('user_id', type=int, help='Id of the user')
+        args = parser.parse_args()
+
+        _name = args['name']
+        _user_id = args['user_id']
+
+        if _name and _user_id is not None:
+            with db_connect.cursor() as video:
+                id = error.ifIsInt(video_id)
+                query = "UPDATE video SET name = '{}', user_id = {} WHERE id = {}".format(_name, _user_id, video_id)
+                if id == len(video_id) and video.execute(query) == 1:
+                    db_connect.commit()
+                    return self.get(video_id)
+                else:
+                    abort(404, "Not found")
+        else :
+            return error.ifIsNone(10001, "Inputs are missed")
+
 
     def delete(self, video_id):
         with db_connect.cursor() as video:
