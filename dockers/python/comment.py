@@ -1,5 +1,5 @@
-import include
-import error
+import include, error
+import user
 from flask import abort, make_response
 from flask_restful import Resource, reqparse
 from flask_jsonpify import jsonify
@@ -9,9 +9,19 @@ db_connect = include.db_connect()
 
 class GetComments(Resource):
         def get(self, video_id):
+            parser = reqparse.RequestParser()
+            parser.add_argument('page', type=str)
+            parser.add_argument('perPage', type=str)
+            args = parser.parse_args()
+
+            _page = int(args['page']) if args['page'] and args['page'] is not "0" and args['page'].isdigit() else 1
+            _perPage = int(args['perPage']) if args['perPage'] and args['perPage'] is not "0" and args['perPage'].isdigit() else 50
+
+            limit = _perPage * _page - _perPage
+
             list = []
             with db_connect.cursor() as comments:
-                query = "SELECT id, body, user_id FROM comment WHERE video_id='{}'".format(video_id)
+                query = "SELECT id, body, user_id FROM comment WHERE video_id='{}' LIMIT {}, {}".format(video_id, limit, _perPage)
                 comments.execute(query)
                 result = comments.fetchall()
                 for row in result:
@@ -21,7 +31,7 @@ class GetComments(Resource):
                         'user': UserById.get(self, row['user_id'])
                     }
                     list.append(listTmp)
-                return make_response(jsonify({'Message ': 'OK', 'data': list, 'pager': {'current': '1', 'total': comments.rowcount}}))
+                return make_response(jsonify({'Message ': 'OK', 'data': list, 'pager': {'current': _page, 'total': comments.rowcount}}))
 
 
 class CreateComments(Resource):
