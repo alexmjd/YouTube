@@ -6,3 +6,8 @@ pymysql
 flask_jsonpify
 cryptography
 flask_jwt_extended
+Flask-SQLAlchemy
+flask-marshmallow 
+flask_httpauth
+marshmallow-sqlalchemy 
+marshmallow
