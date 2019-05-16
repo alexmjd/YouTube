@@ -20,6 +20,11 @@ api = Api(app)
 def not_found(error):
     return make_response(jsonify({'message': 'Not found'}), 404)
 
+#erreur 401 JWT
+@jwt.unauthorized_loader
+def unauthorized_response(callback):
+    return make_response(jsonify({'Message': 'Unauthorized'}), 401)
+
 
 # partie user
 api.add_resource(user.GetUsers, '/users')

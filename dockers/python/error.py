@@ -1,5 +1,6 @@
 from flask import make_response
 from flask_jsonpify import jsonify
+import user, include
 
 """
 Return number of ints in user_id
@@ -16,3 +17,6 @@ def ifIsInt(user_id):
 
 def ifIsNone(code, message_data):
     return make_response(jsonify({"Message": "Bad Request", "code": code, "data": [message_data]}), 400)
+
+def unauthorized():
+    return make_response(jsonify({"Message": "Unauthorized"}), 401)
