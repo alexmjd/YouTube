@@ -6,14 +6,18 @@ from flask_jsonpify import jsonify
 
 db_connect = include.db_connect()
 
+directly_id = user.get_id_user()
+
 
 class GetComments(Resource):
         def get(self, video_id):
             parser = reqparse.RequestParser()
+            parser.add_argument('pseudo', type=str)
             parser.add_argument('page', type=str)
             parser.add_argument('perPage', type=str)
             args = parser.parse_args()
 
+            _userPseudo = args['pseudo'] if args['pseudo'] else ''
             _page = int(args['page']) if args['page'] and args['page'] is not "0" and args['page'].isdigit() else 1
             _perPage = int(args['perPage']) if args['perPage'] and args['perPage'] is not "0" and args['perPage'].isdigit() else 50
 
@@ -36,6 +40,7 @@ class GetComments(Resource):
 
 class CreateComments(Resource):
     def post(self, video_id):
+        if include.ifToken(user.get_id_user()) is True:
             parser = reqparse.RequestParser()
             parser.add_argument('body', type=str, help='Body to create comment')
             args = parser.parse_args()
@@ -43,8 +48,8 @@ class CreateComments(Resource):
             _commentBody = args['body']
 
             # TODO: get current user_id to created new comment
-            _userId = "1"
-
+            _userId = user.get_id_user()
+            print(_userId)
             if _commentBody is not None:
                 with db_connect.cursor() as newComment:
                     query = "INSERT INTO comment (body, user_id, video_id) VALUES ('{}', '{}', '{}')".format(
@@ -55,6 +60,8 @@ class CreateComments(Resource):
                     return make_response(CommentById.get(self, str(newComment.lastrowid)), 201)
             else:
                 return error.ifIsNone(10001, "Veuillez remplir tous les champs obligatoire!")
+        else:
+            error.unauthorized()
 
 
 class CommentById(Resource):

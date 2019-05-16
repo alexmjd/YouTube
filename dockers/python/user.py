@@ -125,7 +125,6 @@ class Authentification(Resource):
         directly_id = str(include.authen(usern, passwd))
         expire = include.token_expiration()
         if directly_id != "0" and (include.ifToken(directly_id) == False or include.tchek_token_expiration(directly_id) == True):
-            print("le del")
             user_token = include.create_token()
             include.add_token(user_token, expire, directly_id)
         else:

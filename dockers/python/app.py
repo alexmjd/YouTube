@@ -1,7 +1,3 @@
-import user
-import comment
-import upload
-import video
 import os
 import logging
 from flask import Flask, flash, request, redirect, url_for, make_response, jsonify, send_from_directory
@@ -14,6 +10,8 @@ app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
 jwt = JWTManager(app)
 api = Api(app)
+
+import user, comment, video, upload
 
 
 @app.errorhandler(404)
