@@ -71,7 +71,7 @@ class UserById(Resource):
             return abort(404,  "Not found")
 
     def put(self, user_id):
-        if include.ifToken(directly_id) == True:
+        if error.ifToken(directly_id) == True:
             parser = reqparse.RequestParser()
             parser.add_argument('username', type=str, help='Username to update user')
             parser.add_argument('email', type=str, help='Email address to update user')
@@ -99,7 +99,7 @@ class UserById(Resource):
             return error.unauthorized()
 
     def delete(self, user_id):
-        if include.ifToken(directly_id) == True:
+        if error.ifToken(directly_id) == True:
             with db_connect.cursor() as user:
                 id = error.ifIsInt(user_id) # if all of chars is int, return the same len than user id
                 query = "DELETE from user where id = {}".format(user_id)
@@ -109,7 +109,7 @@ class UserById(Resource):
                 else:
                     abort(404, "Not found")
         else:
-            error.unauthorized()
+            return error.unauthorized()
 
 
 class Authentification(Resource):
@@ -124,7 +124,7 @@ class Authentification(Resource):
         passwd = args['password']
         directly_id = str(include.authen(usern, passwd))
         expire = include.token_expiration()
-        if directly_id != "0" and (include.ifToken(directly_id) == False or include.tchek_token_expiration(directly_id) == True):
+        if directly_id != "0" and (error.ifToken(directly_id) == False or error.tchek_token_expiration(directly_id) == True):
             user_token = include.create_token()
             include.add_token(user_token, expire, directly_id)
         else:

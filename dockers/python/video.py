@@ -1,7 +1,4 @@
-import include
-import error
-import upload
-import logging
+import include, error, upload, logging, user
 from flask import abort, make_response
 from flask_restful import Resource, reqparse
 from datetime import datetime
@@ -22,6 +19,7 @@ class CreateVideo(Resource):
         return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
 
     def post(self, user_id):
+        if error.ifToken(user.get_id_user()) is True:
             parser = reqparse.RequestParser()
             parser.add_argument('name', type=str, help='name of the video')
             parser.add_argument('source', type=str, help='file of the video')
@@ -49,6 +47,8 @@ class CreateVideo(Resource):
                         abort(404, "Not allowed")
             else:
                 return error.ifIsNone(10001, "Veuillez remplir tous les champs obligatoire!")
+        else:
+            return error.unauthorized()
 
 class GetVideoById(Resource):
     def get(self, video_id):
@@ -61,36 +61,42 @@ class GetVideoById(Resource):
                 return abort(404,  "Not found")
 
     def put(self, video_id):
-        parser = reqparse.RequestParser()
-        parser.add_argument('name', type=str, help='Name of the video')
-        parser.add_argument('user_id', type=int, help='Id of the user')
-        args = parser.parse_args()
+        if error.ifToken(user.get_id_user()) is True:
+            parser = reqparse.RequestParser()
+            parser.add_argument('name', type=str, help='Name of the video')
+            parser.add_argument('user_id', type=int, help='Id of the user')
+            args = parser.parse_args()
 
-        _name = args['name']
-        _user_id = args['user_id']
+            _name = args['name']
+            _user_id = args['user_id']
 
-        if _name and _user_id is not None:
-            with db_connect.cursor() as video:
-                id = error.ifIsInt(video_id)
-                query = "UPDATE video SET name = '{}', user_id = {} WHERE id = {}".format(_name, _user_id, video_id)
-                if id == len(video_id) and video.execute(query) == 1:
-                    db_connect.commit()
-                    return self.get(video_id)
-                else:
-                    abort(404, "Not found")
-        else :
-            return error.ifIsNone(10001, "Inputs are missed")
+            if _name and _user_id is not None:
+                with db_connect.cursor() as video:
+                    id = error.ifIsInt(video_id)
+                    query = "UPDATE video SET name = '{}', user_id = {} WHERE id = {}".format(_name, _user_id, video_id)
+                    if id == len(video_id) and video.execute(query) == 1:
+                        db_connect.commit()
+                        return self.get(video_id)
+                    else:
+                        abort(404, "Not found")
+            else :
+                return error.ifIsNone(10001, "Inputs are missed")
+        else:
+            return error.unauthorized()
 
 
     def delete(self, video_id):
-        with db_connect.cursor() as video:
-            id = error.ifIsInt(video_id)
-            query = "DELETE FROM video WHERE id = {}".format(video_id)
-            if id == len(video_id) and video.execute(query) == 1:
-                db_connect.commit()
-                return {}, 204
-            else:
-                abort(404, "Not found")
+        if error.ifToken(user.get_id_user()) is True:
+            with db_connect.cursor() as video:
+                id = error.ifIsInt(video_id)
+                query = "DELETE FROM video WHERE id = {}".format(video_id)
+                if id == len(video_id) and video.execute(query) == 1:
+                    db_connect.commit()
+                    return {}, 204
+                else:
+                    abort(404, "Not found")
+        else:
+            return error.unauthorized()
 
 class GetVideosByIdUser(Resource):
     def get(self, user_id):

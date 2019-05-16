@@ -1,6 +1,4 @@
 import pymysql.cursors
-import requests
-import error
 import user
 from itsdangerous import URLSafeSerializer
 from datetime import datetime, timedelta
@@ -16,7 +14,7 @@ def db_connect():
                            charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
 
-
+import error
 db = db_connect()
 jwt_token = ""
 
@@ -81,21 +79,6 @@ def token_expiration():
     return datetime.now() + timedelta(hours=4)
 
 
-def tchek_token_expiration(id_user):
-    with db.cursor() as cursor:
-        query = "SELECT expired_at FROM token where user_id = {}".format(id_user)
-        if cursor.execute(query) == 1:
-            data = cursor.fetchone()
-            expired_at = data['expired_at']
-            if expired_at < datetime.now():
-                delete_token(id_user)
-                return True
-            else:
-                return False
-        else:
-            return True
-
-
 def get_token_by_user(id_user):
     with db.cursor() as cursor:
         query = "SELECT code FROM token where user_id = {}".format(id_user)
@@ -105,14 +88,6 @@ def get_token_by_user(id_user):
         else:
             return False
 
-
-def ifToken(id_user):
-    with db.cursor() as cursor:
-        query = "SELECT user_id FROM token where user_id = {}".format(id_user)
-        if cursor.execute(query) == 1:
-            return True
-        else:
-            return False
 
 ######## jwt ##########################
 def create_JWT(username):

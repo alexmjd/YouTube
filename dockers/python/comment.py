@@ -1,5 +1,4 @@
-import include, error
-import user
+import include, error, user
 from flask import abort, make_response
 from flask_restful import Resource, reqparse
 from flask_jsonpify import jsonify
@@ -40,16 +39,14 @@ class GetComments(Resource):
 
 class CreateComments(Resource):
     def post(self, video_id):
-        if include.ifToken(user.get_id_user()) is True:
+        if error.ifToken(user.get_id_user()) is True:
             parser = reqparse.RequestParser()
             parser.add_argument('body', type=str, help='Body to create comment')
             args = parser.parse_args()
 
             _commentBody = args['body']
 
-            # TODO: get current user_id to created new comment
             _userId = user.get_id_user()
-            print(_userId)
             if _commentBody is not None:
                 with db_connect.cursor() as newComment:
                     query = "INSERT INTO comment (body, user_id, video_id) VALUES ('{}', '{}', '{}')".format(

@@ -1,6 +1,9 @@
 from flask import make_response
 from flask_jsonpify import jsonify
 import user, include
+from datetime import datetime, timedelta
+
+db = include.db_connect()
 
 """
 Return number of ints in user_id
@@ -20,3 +23,27 @@ def ifIsNone(code, message_data):
 
 def unauthorized():
     return make_response(jsonify({"Message": "Unauthorized"}), 401)
+
+
+def tchek_token_expiration(id_user):
+    with db.cursor() as cursor:
+        query = "SELECT expired_at FROM token where user_id = {}".format(id_user)
+        if cursor.execute(query) == 1:
+            data = cursor.fetchone()
+            expired_at = data['expired_at']
+            if expired_at < datetime.now():
+                include.delete_token(id_user)
+                return True
+            else:
+                return False
+        else:
+            return True
+
+
+def ifToken(id_user):
+    with db.cursor() as cursor:
+        query = "SELECT user_id FROM token where user_id = {}".format(id_user)
+        if cursor.execute(query) == 1:
+            return True
+        else:
+            return False
