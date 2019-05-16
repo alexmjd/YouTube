@@ -12,7 +12,7 @@ jwt = JWTManager(app)
 api = Api(app)
 
 
-import user, comment, video, upload
+import user, comment, upload, video
 
 
 @app.errorhandler(404)
