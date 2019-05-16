@@ -127,3 +127,14 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 insert into user values (1, 'toto', 'toto@toto.fr', "truc", 'password', now());
 insert into user values (2, 'titi', 'titi@titi.fr', "bidul", 'test', now());
 insert into user values (3, 'tata', 'tata@tata.fr', "chouette", 'plop', now());
+
+insert into video values (1, 'video 1', 60, 1, 'source bidon 1', now(), 1, 1);
+insert into video values (2, 'video 2', 120, 3, 'source bidon 2', now(), 4, 1);
+insert into video values (3, 'video 3', 90, 1, 'source bidon 3', now(), 12, 1);
+insert into video values (4, 'video 4', 30, 2, 'source bidon 4', now(), 7, 0);
+
+insert into comment values (1, 'commentaire 1', 1, 1);
+insert into comment values (2, 'commentaire 2', 1, 3);
+insert into comment values (3, 'commentaire 3', 3, 1);
+insert into comment values (4, 'commentaire 4', 2, 1);
+insert into comment values (5, 'commentaire 5', 3, 2);

@@ -1,7 +1,9 @@
 from flask import make_response
 from flask_jsonpify import jsonify
 
-
+"""
+Return number of ints in user_id
+"""
 def ifIsInt(user_id):
     nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     car = 0
