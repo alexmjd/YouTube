@@ -1,7 +1,8 @@
 from flask import make_response
 from flask_jsonpify import jsonify
-import user, include
 from datetime import datetime, timedelta
+import re
+import user, include
 
 db = include.db_connect()
 
@@ -47,3 +48,30 @@ def ifToken(id_user):
             return True
         else:
             return False
+
+
+def tchek_email(mail):
+    match = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', mail)
+    if match == None:
+        return 'Mail invalide, '
+    with db.cursor() as authenti:
+        query = "SELECT email from user where email = '{}'".format(mail)
+        if authenti.execute(query) == 1:
+            return "Cette email est déjà utilisée, "
+        else:
+            return ""
+
+def tchek_username(user):
+    with db.cursor() as authenti:
+        query = "SELECT username from user where username = '{}'".format(user)
+        if authenti.execute(query) == 1:
+            return "Cette username est déjà utilisé, "
+        else:
+            return ""
+
+
+def tchek_password(passwd):
+    if len(passwd) < 8:
+        return " Mot de passe trop court, "
+    else:
+        return ""

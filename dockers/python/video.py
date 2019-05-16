@@ -6,6 +6,7 @@ from flask_jsonpify import jsonify
 
 db_connect = include.db_connect()
 
+
 class GetVideos(Resource):
     def get(self):
         with db_connect.cursor() as video:
@@ -13,6 +14,7 @@ class GetVideos(Resource):
             video.execute(query)
             results = video.fetchall()
             return make_response(jsonify({'Message ': 'OK', 'data': results, 'pager': {'current': 1, 'total': video.rowcount}}))
+
 
 class CreateVideo(Resource):
     def get_timestamp(self):
@@ -50,6 +52,7 @@ class CreateVideo(Resource):
         else:
             return error.unauthorized()
 
+
 class GetVideoById(Resource):
     def get(self, video_id):
         with db_connect.cursor() as video:
@@ -84,7 +87,6 @@ class GetVideoById(Resource):
         else:
             return error.unauthorized()
 
-
     def delete(self, video_id):
         if error.ifToken(user.get_id_user()) is True:
             with db_connect.cursor() as video:
@@ -97,6 +99,7 @@ class GetVideoById(Resource):
                     abort(404, "Not found")
         else:
             return error.unauthorized()
+
 
 class GetVideosByIdUser(Resource):
     def get(self, user_id):

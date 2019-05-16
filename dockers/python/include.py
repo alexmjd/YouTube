@@ -14,7 +14,10 @@ def db_connect():
                            charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
 
+
 import error
+
+
 db = db_connect()
 jwt_token = ""
 
@@ -32,7 +35,7 @@ def get_username_by_id(user_id):
 def get_user_by_id(user_id):
     with db.cursor() as cursor:
         id = error.ifIsInt(user_id)
-        #Pour gérer si l'user est bien le proprio de la ressource mais problématique
+        # Pour gérer si l'user est bien le proprio de la ressource mais problématique
         query = "SELECT id, username, created_at, pseudo FROM user WHERE id= '{}'".format(user_id)
         if user.get_id_user() == user_id:
             query = "SELECT id, username, created_at, email, pseudo FROM user WHERE id= '{}'".format(user_id)
@@ -42,7 +45,9 @@ def get_user_by_id(user_id):
             return False
 
 
-############ Authentification ########################
+"""
+    Authentification
+"""
 def authen(usern, passwd):
     with db.cursor() as cursor:
         query = "SELECT id FROM user WHERE username = '{}' and password = '{}'".format(usern, passwd)
@@ -54,7 +59,9 @@ def authen(usern, passwd):
             return 0
 
 
-############ token ###############
+""" 
+    TOKEN
+"""
 def add_token(token, expire, id_user):
     with db.cursor() as cursor:
         query = "INSERT INTO token (code, expired_at, user_id) VALUES ('{}', '{}', '{}')".format(token, expire, id_user)
@@ -69,9 +76,9 @@ def delete_token(id_user):
             db.commit()
 
 
-def create_token():
+def create_token(id_user):
     basic_token = URLSafeSerializer('secret-key')
-    user_token = basic_token.dumps([1, 2, 3, 4, 5])
+    user_token = basic_token.dumps(id_user)
     return user_token
 
 
@@ -89,7 +96,9 @@ def get_token_by_user(id_user):
             return False
 
 
-######## jwt ##########################
+"""
+    JWT
+"""
 def create_JWT(username):
     jwt_access_token = create_access_token(identity=username)
     jwt_refresh_token = create_refresh_token(identity=username)

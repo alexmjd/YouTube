@@ -11,6 +11,7 @@ app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
 jwt = JWTManager(app)
 api = Api(app)
 
+
 import user, comment, video, upload
 
 

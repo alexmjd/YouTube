@@ -1,4 +1,4 @@
-import include, error#, app
+import include, error
 from flask_httpauth import HTTPBasicAuth
 from flask import abort, make_response
 from flask_restful import Resource,  reqparse
@@ -51,7 +51,12 @@ class CreateUser(Resource):
             _userPseudo = args['pseudo']
             _userPassword = args['password']
 
+            stack = str(error.tchek_username(_userUsername)) + str(error.tchek_email(_userEmail)) + str(
+                error.tchek_password(_userPassword))
+
             if _userUsername and _userEmail and _userPassword is not None:
+                if stack != "":
+                    return error.ifIsNone(10001, stack)
                 with db_connect.cursor() as newUser:
                     query = "INSERT INTO user (username, email, pseudo, password, created_at) VALUES ('{}', '{}', '{}', '{}', '{}')".format(
                         _userUsername, _userEmail, _userPseudo, _userPassword, self.get_timestamp())
@@ -125,7 +130,7 @@ class Authentification(Resource):
         directly_id = str(include.authen(usern, passwd))
         expire = include.token_expiration()
         if directly_id != "0" and (error.ifToken(directly_id) == False or error.tchek_token_expiration(directly_id) == True):
-            user_token = include.create_token()
+            user_token = include.create_token(directly_id)
             include.add_token(user_token, expire, directly_id)
         else:
             user_token = include.get_token_by_user(directly_id)
