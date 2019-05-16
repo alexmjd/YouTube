@@ -29,6 +29,7 @@ api.add_resource(user.Authentification, '/auth')
 
 # Partie commentaires
 api.add_resource(comment.GetComments, '/video/<video_id>/comments')
+api.add_resource(comment.CreateComments, '/video/<video_id>/comment')
 
 # Partie vidéo
 api.add_resource(video.GetVideos, '/videos')
