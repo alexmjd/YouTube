@@ -1,4 +1,4 @@
-import include, error
+import include, error, logging
 from flask_httpauth import HTTPBasicAuth
 from flask import abort, make_response
 from flask_restful import Resource,  reqparse

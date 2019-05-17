@@ -14,6 +14,8 @@ api = Api(app)
 
 import user, comment, upload, video
 
+logging.getLogger().setLevel(logging.INFO)
+
 
 @app.errorhandler(404)
 def not_found(error):
