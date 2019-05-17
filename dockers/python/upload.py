@@ -8,8 +8,8 @@ from flask_restful import Resource
 
 
 UPLOAD_FOLDER = '/home/videos'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
-#ALLOWED_EXTENSIONS = set(['webm', 'mkv', 'flv', 'avi', 'mpg','mpeg', 'mov', 'wmv', 'mp4', 'm4p'])
+#ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['webm', 'mkv', 'flv', 'avi', 'mpg','mpeg', 'mov', 'wmv', 'mp4', 'm4p'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -25,7 +25,7 @@ class Upload(Resource):
             #return make_response("post is ok")
             # check if file is in the post method
             if 'source' not in request.files:
-                logging.warning(request.files)
+                logging.info(request.files)
                 return "no file"
                 flash('No file')
                 return redirect(request.url)
@@ -33,25 +33,25 @@ class Upload(Resource):
             file = request.files['source']
 
             if file.filename == '':
-                logging.warning("no filename")
+                logging.info("no filename")
                 return "no filename"
                 flash('No selected file')
                 return redirect(request.url)
 
             logging.warning("Testing allowed file\n")
             if file and self.allowed_file(file.filename):
-                logging.warning("Good route 2\n")
+                logging.info("Good route 2\n")
                 #return "file is ok"
                 filename = secure_filename(file.filename)
                 if not os.path.exists(UPLOAD_FOLDER):
                     os.mkdir(UPLOAD_FOLDER)
-                    logging.warning("{} has been created\n".format(UPLOAD_FOLDER))
+                    logging.info("{} has been created\n".format(UPLOAD_FOLDER))
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 return filename
                 #return redirect(url_for('uploaded_file', filename=filename))
             else:
-                logging.warning(file)
-                logging.warning(self.allowed_file(file.filename))
+                logging.info(file)
+                logging.info(self.allowed_file(file.filename))
                 return make_response(jsonify({'Message':'something went wrong'}))
             return make_response("ok")
 
