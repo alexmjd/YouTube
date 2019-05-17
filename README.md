@@ -1,21 +1,17 @@
 # YouTube
 Etna_Youtube_Api
 
-# The docker :
-    dockers/regen.sh 
-This script will stop and destroy containers, build images if they don't exist and run dockers
+# How to use this API
+## Docker
+Install Docker 
+```
+run script regen.sh
+```
+## Usefull commands
+```docker ps``` : Show docker process
 
+```docker exec -it "nom_container" bash``` : Go into the selected container
 
+```docker logs "nom_container"``` : Show container logs
 
-# Virtual env : 
-
-## With python3, juste type:
-    python3 -m venv env
-This will create a new virtual environment named "env"
-
-## To activate this one:
-    source env/bin/activate
-This will place you in the virtual env
-
-## To get out:
-    deactivate
+```docker-compose up -d``` : run the docker-compose file
