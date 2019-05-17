@@ -36,11 +36,11 @@ def get_user_by_id(user_id):
     with db.cursor() as cursor:
         id = error.ifIsInt(user_id)
         # Pour gérer si l'user est bien le proprio de la ressource mais problématique
-        query = "SELECT id, username, created_at, pseudo FROM user WHERE id= '{}'".format(user_id)
+        query = "SELECT id, username, created_at, pseudo FROM user WHERE id={}".format(user_id)
         if user.get_id_user() == user_id:
-            query = "SELECT id, username, created_at, email, pseudo FROM user WHERE id= '{}'".format(user_id)
+            query = "SELECT id, username, created_at, email, pseudo FROM user WHERE id={}".format(user_id)
         if id == len(user_id) and cursor.execute(query) == 1:
-            return cursor.fetchall()
+            return cursor.fetchone()
         else:
             return False
 
