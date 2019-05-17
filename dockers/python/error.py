@@ -2,7 +2,7 @@ from flask import make_response
 from flask_jsonpify import jsonify
 from datetime import datetime, timedelta
 import re
-import user, include
+import user, include, logging
 
 db = include.db_connect()
 
@@ -51,11 +51,13 @@ def ifToken(id_user):
 
 
 def tchek_email(mail):
-    match = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', mail)
+    match = re.match('^[_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', mail)
     if match == None:
         return 'Mail invalide, '
     with db.cursor() as authenti:
         query = "SELECT email from user where email = '{}'".format(mail)
+        logging.info(query)
+        logging.info(authenti.execute(query))
         if authenti.execute(query) == 1:
             return "Cette email est déjà utilisée, "
         else:

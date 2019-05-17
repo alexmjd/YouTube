@@ -51,11 +51,14 @@ class CreateUser(Resource):
             _userPseudo = args['pseudo']
             _userPassword = args['password']
 
+            logging.info("We are here, create user \n")
+
             stack = str(error.tchek_username(_userUsername)) + str(error.tchek_email(_userEmail)) + str(
                 error.tchek_password(_userPassword))
 
             if _userUsername and _userEmail and _userPassword is not None:
                 if stack != "":
+                    logging.info(stack)
                     return error.ifIsNone(10001, stack)
                 with db_connect.cursor() as newUser:
                     query = "INSERT INTO user (username, email, pseudo, password, created_at) VALUES ('{}', '{}', '{}', '{}', '{}')".format(
