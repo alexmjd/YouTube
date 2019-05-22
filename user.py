@@ -35,10 +35,12 @@ class GetUsers(Resource):
             _page = int(args['page']) if args['page'] and args['page'] is not "0" and args['page'].isdigit() else 1
             _perPage = int(args['perPage']) if args['perPage'] and args['perPage'] is not "0" and args['perPage'].isdigit() else 50
 
-            limit = _perPage * _page - _perPage
+            start_index = _perPage * _page - _perPage
+
             all_users = User.query.all()
             result = users_schema.dump(all_users)
-            return make_response(jsonify({'Message ': 'OK', 'data': result.data, 'pager': {'current': _page, 'total': len(result.data)}}))
+            result = result.data[start_index:start_index+_perPage]
+            return make_response(jsonify({'Message ': 'OK', 'data': result, 'pager': {'current': _page, 'total': len(result)}}))
 
 
 class CreateUser(Resource):

@@ -64,7 +64,7 @@ class Comment(db.Model):
 class CommentSchema(ma.Schema):
     class Meta:
         # Fields to expose
-        fields = ('body', 'user_id', 'video_id')
+        fields = ('id', 'body', 'user_id', 'video_id')
 
 
 class Video(db.Model):
@@ -84,7 +84,7 @@ class Video(db.Model):
         self.duration = duration
         self.user_id = user_id
         self.source = source
-        self.created_at = datetime.now()
+        self.created_at = datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
         self.view = view
         self.enabled = enabled
 
@@ -92,7 +92,7 @@ class Video(db.Model):
 class VideoSchema(ma.Schema):
     class Meta:
         # Fields to expose
-        fields = ('name', 'duration,', 'user_id', 'source', 'created_at', 'view', 'enabled')
+        fields = ('id', 'name', 'duration,', 'user_id', 'source', 'created_at', 'view', 'enabled')
 
 
 class Video_Format(db.Model):
@@ -112,4 +112,4 @@ class Video_Format(db.Model):
 class Video_FormatSchema(ma.Schema):
     class Meta:
         # Fields to expose
-        fields = ('code', 'user_id', 'uri')
+        fields = ('id', 'code', 'user_id', 'uri')

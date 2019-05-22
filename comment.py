@@ -5,35 +5,38 @@ from flask_jsonpify import jsonify
 from app import db, ma
 from SchemaSQLA import Comment, CommentSchema, User, UserSchema
 
-db_connect = include.db_connect()
+
+# init schema
+comment_schema = CommentSchema()
+comments_schema = CommentSchema(many=True)
 
 
 class GetComments(Resource):
     def get(self, video_id):
         parser = reqparse.RequestParser()
-        parser.add_argument('pseudo', type=str)
         parser.add_argument('page', type=str)
         parser.add_argument('perPage', type=str)
         args = parser.parse_args()
 
-        _userPseudo = args['pseudo'] if args['pseudo'] else ''
         _page = int(args['page']) if args['page'] and args['page'] is not "0" and args['page'].isdigit() else 1
         _perPage = int(args['perPage']) if args['perPage'] and args['perPage'] is not "0" and args['perPage'].isdigit() else 50
 
-        limit = _perPage * _page - _perPage
+        start_index = _perPage * _page - _perPage
 
         list = []
-        com = Comment.query.filter_by(video_id=video_id).first()
-        if com is not None:
-            data = CommentSchema().dump(com).data
-            for row in data:
+
+        all_comments = Comment.query.filter_by(video_id=video_id).all()
+        if all_comments is not None:
+            result = comments_schema.dump(all_comments)
+            result = result.data[start_index:start_index+_perPage]
+            for row in result:
                 listTmp = {
                     'id': row['id'],
                     'body': row['body'],
                     'user': UserById.get(self, row['user_id'])
                 }
                 list.append(listTmp)
-            return make_response(jsonify({'Message ': 'OK', 'data': list, 'pager': {'current': _page, 'total': data.rowcount}}))
+            return make_response(jsonify({'Message ': 'OK', 'data': list, 'pager': {'current': _page, 'total': len(result)}}))
         else:
             return error.badRequest(10005)
         #with db_connect.cursor() as comments:
