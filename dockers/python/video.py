@@ -158,4 +158,5 @@ class GetVideosByIdUser(Resource):
                 return make_response(jsonify({'Message': 'OK', 'data': videos.fetchall(), 'pager': {'current': _page, 'total': videos.rowcount}}))
 
             else:
+                # ajouter retour
                 abort(404, "Not found")
