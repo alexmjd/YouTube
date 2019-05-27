@@ -103,7 +103,7 @@ class Video_Format(db.Model):
     user_id = db.Column(db.Integer, nullable=False)
     uri = db.Column(db.String(128), nullable=False)
 
-    def __init__(self, code, user_id, uri):
+    def __init__(self, code, uri, user_id):
         self.code = code
         self.uri = uri
         self.user_id = user_id

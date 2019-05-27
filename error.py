@@ -20,6 +20,15 @@ def ifId_video(id_video):
         return data['id']
     else:
         return False
+
+
+def user_id_by_video_id(video_id):
+    vid = Video.query.get(video_id)
+    if vid is not None:
+        data = VideoSchema().dump(vid).data
+        return data['user_id']
+    else:
+        return -1
     #with dab.cursor() as cursor:
     #    query = "SELECT id FROM video where id = {}".format(id_video)
     #    if cursor.execute(query) == 1:
