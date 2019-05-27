@@ -7,6 +7,7 @@ from flask_restful import reqparse
 from user import UserSchema, User
 from SchemaSQLA import Token, TokenSchema, User, UserSchema
 from app import db, ma
+
 # conn to db
 def db_connect():
     return pymysql.connect(host='localhost',
@@ -20,7 +21,9 @@ def db_connect():
 jwt_token = ""
 import error
 
-######################## get #############################################
+"""
+    GET
+"""
 def get_username_by_id(user_id):
     name = User.query.get(user_id)
     if name is not None:
@@ -104,6 +107,7 @@ def create_JWT(username):
 def get_jwt():
     global jwt_token
     return jwt_token
+
 
 """
     HEADER

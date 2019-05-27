@@ -8,9 +8,8 @@ from SchemaSQLA import Token, TokenSchema, User, UserSchema, Video, VideoSchema
 dab = include.db_connect()
 
 """
-Return number of ints in user_id
+    Return number of ints in user_id
 """
-
 
 
 def ifId_video(id_video):
@@ -26,7 +25,7 @@ def user_id_by_video_id(video_id):
     vid = Video.query.get(video_id)
     if vid is not None:
         data = VideoSchema().dump(vid).data
-        return data['user_id']
+        return str(data['user_id'])
     else:
         return -1
     #with dab.cursor() as cursor:

@@ -92,7 +92,7 @@ class Video(db.Model):
 class VideoSchema(ma.Schema):
     class Meta:
         # Fields to expose
-        fields = ('id', 'name', 'duration,', 'user_id', 'source', 'created_at', 'view', 'enabled')
+        fields = ('id', 'name', 'duration', 'user_id', 'source', 'created_at', 'view', 'enabled')
 
 
 class Video_Format(db.Model):
