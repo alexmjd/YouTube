@@ -1,6 +1,7 @@
 import logging
 from flask import Flask
 from flask_restful import Resource, Api
+from flask_cors import CORS
 from models.users import user as user
 from models.comment import comment as comment
 from models.video import video
@@ -12,6 +13,7 @@ logging.getLogger().setLevel(logging.INFO)
 app = config.app
 
 api = Api(app)
+CORS(app)
 
 # Create a URL route in our application for "/"
 @app.route('/')

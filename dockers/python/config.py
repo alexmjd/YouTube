@@ -17,6 +17,8 @@ app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://user:pass@t_db/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['CORS_ENABLED'] = True
+
 # Create the SQLAlchemy db instance
 db = SQLAlchemy(app)
 
