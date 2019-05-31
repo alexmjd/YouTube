@@ -65,35 +65,33 @@ class User(Resource):
             parser.add_argument('pseudo', type=str, help='Pseudo to update user')
             parser.add_argument('password', type=str, help='Password to update user')
             args = parser.parse_args()
-
             _userUsername = args['username']
             _userEmail = args['email']
             _userPseudo = args['pseudo']
             _userPassword = args['password']
-            stack = str(error.tchek_username(_userUsername)) + str(error.tchek_email(_userEmail)) + str(
-                error.tchek_password(_userPassword))
-            if _userPseudo is None:
-                _userPseudo = ""
-
-            if _userUsername and _userEmail and _userPassword and _userPassword is not None:
-                if stack != "":
-                    return error.badRequest(10034, stack)
-                user = mod.User.query.get(user_id)
-                if user is not None:
-                    logging.info("Info logging: USER is NOT NONE")
-                    user.username = _userUsername
-                    user.email = _userEmail
-                    user.pseudo = _userPseudo
-                    user.password = _userPassword
-                    mod.db.session.commit()
-                    return self.get(user_id)
-                else:
-                    logging.info("Info logging: User is NONE")
-                    return error.badRequest(10005, "erreur dans le traitement de la requête")
+            data = include.get_user_by_id(user_id)
+            user = mod.User.query.get(user_id)
+            stack = error.tchek_form_put_user(_userPassword, _userEmail, _userUsername, data['username'], data['email'] )
+            if stack  != "":
+                return error.badRequest(10034, stack)
             else:
-                return error.badRequest(10001, "Veuillez remplir tous les champs obligatoire!")
+                if _userUsername != "":
+                    user.username = _userUsername
+                if _userEmail != "":
+                    user.email = _userEmail
+                if _userPassword != "":
+                    user.password = _userPassword
+                if _userPseudo != "":
+                    user.pseudo = _userPseudo
+            if user is not None:
+                logging.info("Info logging: USER is NOT NONE")
+                mod.db.session.commit()
+                return self.get(user_id)
+            else:
+                logging.info("Info logging: User is NONE")
+                return error.badRequest(10005, "erreur dans le traitement de la requête")
         else:
-           return error.unauthorized()
+            return error.unauthorized()
 
     # Delete User by Id
     def delete(self, user_id):

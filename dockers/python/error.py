@@ -90,6 +90,17 @@ def tchek_email(mail):
         return ""
 
 
+def tchek_form_put_user(_userPassword, _userEmail, _userUsername, dataUser, dataEmail):
+    stack = ""
+    if _userPassword != "":
+        stack = str(tchek_password(_userPassword))
+    if dataUser != _userUsername and _userUsername != "":
+        stack = stack + str(tchek_username(_userUsername))
+    if dataEmail != _userEmail and _userEmail != "":
+        stack = stack + str(tchek_email(_userEmail))
+    return stack
+
+
 def ifToken(token_data):
     token = False
     tok = Token.query.filter_by(code=token_data).first()
