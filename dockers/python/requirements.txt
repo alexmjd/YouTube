@@ -2,7 +2,6 @@ flask
 requests
 connexion
 flask_restful
-flask-cors
 pymysql
 flask_jsonpify
 cryptography

@@ -11,6 +11,7 @@ ALLOWED_EXTENSIONS = set(['webm', 'mkv', 'flv', 'avi', 'mpg','mpeg', 'mov', 'wmv
 
 class Upload(Resource):
     def allowed_file(self, file_name):
+
         return '.' in file_name and file_name.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
     def upload_file(self):

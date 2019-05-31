@@ -41,7 +41,6 @@ def badRequest(code, message_data):
 def unauthorized():
     return make_response(jsonify({"Message": "Unauthorized"}), 401)
 
-
 def notFound():
     return make_response(jsonify({"Message": "Not found"}), 404)
 
@@ -74,10 +73,12 @@ def tchek_username(user):
         return ""
 
 
+
 def tchek_email(mail):
     match = re.match('^[_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', mail)
     if match == None:
         return 'Mail invalide, '
+
     Email = User.query.filter_by(email=mail).first()
     if Email is not None:
         return "Cette email est déjà utilisée, "

@@ -6,17 +6,18 @@ from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_r
 from flask_restful import reqparse
 
 
-jwt_token = ""
+
 import error
 from models.users.model import User, UserSchema
 from models.auth.model import Token, TokenSchema
 from models.video.model import Video, VideoSchema
+from models.users import user
 
 import config
 db = config.db
 ma = config.ma
 
-from models.users import user
+jwt_token = ""
 
 ######################## get #############################################
 def get_username_by_id(user_id):
@@ -70,6 +71,7 @@ def get_user_id_by_video_id(video_id):
     Authentification
 """
 def authen(usern, passwd):
+
     auth = User.query.filter_by(username=usern, password=passwd).first()
     if auth is not None:
         data = UserSchema().dump(auth).data
@@ -97,7 +99,6 @@ def create_token():
     user_token = secrets.token_urlsafe()
     return user_token
 
-
 """
     JWT
 """
@@ -110,6 +111,7 @@ def create_JWT(username):
 
 def get_jwt():
     global jwt_token
+
     return jwt_token
 
 """
