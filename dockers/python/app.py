@@ -10,6 +10,7 @@ import config
 
 logging.getLogger().setLevel(logging.INFO)
 
+# Get the current App with Configurations
 app = config.app
 
 api = Api(app)

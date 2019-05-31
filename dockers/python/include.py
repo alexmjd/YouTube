@@ -1,4 +1,4 @@
-import secrets
+import secrets, logging
 from itsdangerous import URLSafeSerializer
 from datetime import datetime, timedelta
 from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required
@@ -41,6 +41,9 @@ def get_user_id_by_token(token):
     if userId is not None:
         print("not none")
         data = TokenSchema().dump(userId).data
+
+        logging.info("INCLUDE MODULE :: PRINT DATA {} \n\n".format(data))
+
         return data['user_id']
     else:
         return False

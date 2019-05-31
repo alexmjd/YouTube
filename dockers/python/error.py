@@ -88,8 +88,11 @@ def tchek_email(mail):
 def ifToken(token_data):
     token = False
     tok = Token.query.filter_by(code=token_data).first()
+
+    logging.info("MODULE ERROR ===> TOKEN :: {} \n\n".format(tok))
     if tok is not None:
         data = TokenSchema().dump(tok).data
+        logging.info("MODULE ERROR ===> TOKEN :: {} \n\n".format(data))
         #if data['code'] == token_data:
         token = True
     return token
@@ -108,3 +111,13 @@ def tchek_token_expiration(id_user):
     else:
         print("ta mere")
         return True
+
+def isBool(v):
+    logging.info("PRINT V : {} \n\n".format(v))
+    if v in ('yes', 'true', 't', 'y', '1', 1):
+        return True
+    elif v in ('no', 'false', 'f', 'n', '0', 0):
+        return False
+    else:
+        return 'Boolean Value Expected.'
+        raise argparse.ArgumentTypeError('Boolean value expected.')

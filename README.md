@@ -15,3 +15,9 @@ run script regen.sh
 ```docker logs "nom_container"``` : Show container logs
 
 ```docker-compose up -d``` : run the docker-compose file
+
+## If you need to install new package, 2 choices :
+
+### Add the new package in file requirements.txt, Delete the docker image and rebuild it by launching the script regen.sh
+
+### Install the package with pip, then Use pip freeze > requirements.txt

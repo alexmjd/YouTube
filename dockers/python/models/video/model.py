@@ -18,7 +18,7 @@ class Video(db.Model):
     source = db.Column(db.String(45), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
     view = db.Column(db.Integer, nullable=False)
-    enabled = db.Column(db.Integer, nullable=False)
+    enabled = db.Column(db.Boolean, nullable=False, default=False)
 
     def __init__(self, name, duration, user_id, source, view, enabled):
         self.name = name

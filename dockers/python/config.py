@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_FOLDER = '/home/videos'
+
 # Create the Connexion application instance
 connex_app = connexion.App(__name__, specification_dir=basedir)
 
@@ -16,7 +16,7 @@ app = connex_app.app
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://user:pass@t_db/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = '/home/videos'
 app.config['CORS_ENABLED'] = True
 
 # Create the SQLAlchemy db instance

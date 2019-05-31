@@ -66,14 +66,22 @@ class Video(Resource):
                 return error.forbidden()
             parser = reqparse.RequestParser()
             parser.add_argument('name', type=str, help='Name of the video')
+            parser.add_argument('enable', type=bool, action='store_true', help='The video could be watched')
             args = parser.parse_args()
 
-            _name = args['name']
+            logging.info("Print ARGS :: {} \n\n".format(args))
 
-            if _name is not None:
+            _name = args['name']
+            _enable = error.isBool(args['enable'])
+
+            if _name is not None and _enable is not None:
                 video = mod.Video.query.get(video_id)
                 if video is not None:
+                    logging.info("TYPE OF :: {} \n\n".format(_enable))
+                    logging.info("TYPE OF :: {} \n\n".format(type(_enable)))
                     video.name = _name
+                    video.enabled = _enable
+                    logging.info("TYPE OF :: {} \n\n".format(video.enabled))
                     mod.db.session.commit()
                     return self.get(video_id)
                 else:
@@ -112,7 +120,10 @@ class VideoByUser(Resource):
             return error.notFound()
         token_head = include.header()
         if error.ifToken(token_head) is True:
-            if include.get_user_id_by_token(token_head) != user_id:
+            id_user = include.get_user_id_by_token(token_head)
+
+            """ user_id is received as str, so we need to cast it in int """
+            if id_user != int(user_id):
                 return error.forbidden()
             parser = reqparse.RequestParser()
             parser.add_argument('name', type=str, help='name of the video')
@@ -123,9 +134,6 @@ class VideoByUser(Resource):
 
             _name = args['name']
             _source = uploader.upload_file()
-            id_user = include.get_user_id_by_token(token_head)
-            logging.warning(_source)
-            # _source = args['source']
             if _name and _source is not None and _name and _source is not "":
                 new_video = mod.Video(_name, 300, id_user, _source, 0, 1)
                 mod.db.session.add(new_video)
