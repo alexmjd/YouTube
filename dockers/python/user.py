@@ -1,13 +1,4 @@
-"""import include
-import error
-from flask import abort, make_response
-from flask_restful import Resource,  reqparse
-from flask_jsonpify import jsonify
-from datetime import datetime
-from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required
-                                , jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
-"""
-import include, error#, app
+import include, error, logging
 from flask_httpauth import HTTPBasicAuth
 from flask import abort, make_response
 from flask_restful import Resource,  reqparse
@@ -60,7 +51,15 @@ class CreateUser(Resource):
             _userPseudo = args['pseudo']
             _userPassword = args['password']
 
+            logging.info("We are here, create user \n")
+
+            stack = str(error.tchek_username(_userUsername)) + str(error.tchek_email(_userEmail)) + str(
+                error.tchek_password(_userPassword))
+
             if _userUsername and _userEmail and _userPassword is not None:
+                if stack != "":
+                    logging.info(stack)
+                    return error.ifIsNone(10001, stack)
                 with db_connect.cursor() as newUser:
                     query = "INSERT INTO user (username, email, pseudo, password, created_at) VALUES ('{}', '{}', '{}', '{}', '{}')".format(
                         _userUsername, _userEmail, _userPseudo, _userPassword, self.get_timestamp())
@@ -80,7 +79,7 @@ class UserById(Resource):
             return abort(404,  "Not found")
 
     def put(self, user_id):
-        if include.ifToken(directly_id) == True:
+        if error.ifToken(directly_id) == True:
             parser = reqparse.RequestParser()
             parser.add_argument('username', type=str, help='Username to update user')
             parser.add_argument('email', type=str, help='Email address to update user')
@@ -108,7 +107,7 @@ class UserById(Resource):
             return error.unauthorized()
 
     def delete(self, user_id):
-        if include.ifToken(directly_id) == True:
+        if error.ifToken(directly_id) == True:
             with db_connect.cursor() as user:
                 id = error.ifIsInt(user_id) # if all of chars is int, return the same len than user id
                 query = "DELETE from user where id = {}".format(user_id)
@@ -118,7 +117,7 @@ class UserById(Resource):
                 else:
                     abort(404, "Not found")
         else:
-            error.unauthorized()
+            return error.unauthorized()
 
 
 class Authentification(Resource):
@@ -133,9 +132,8 @@ class Authentification(Resource):
         passwd = args['password']
         directly_id = str(include.authen(usern, passwd))
         expire = include.token_expiration()
-        if directly_id != "0" and (include.ifToken(directly_id) == False or include.tchek_token_expiration(directly_id) == True):
-            print("le del")
-            user_token = include.create_token()
+        if directly_id != "0" and (error.ifToken(directly_id) == False or error.tchek_token_expiration(directly_id) == True):
+            user_token = include.create_token(directly_id)
             include.add_token(user_token, expire, directly_id)
         else:
             user_token = include.get_token_by_user(directly_id)
@@ -144,72 +142,3 @@ class Authentification(Resource):
             return make_response(jsonify({"Message": 'OK', 'data': {'token': user_token, 'user': data}}), 201)
         else:
             return error.ifIsNone(10001, "Identifiant ou mot de passe invalide !")
-
-"""
-class UserById(Resource):
-    def get(self, user_id):
-        with db_connect.cursor() as cursor:
-            id = error.ifIsInt(user_id)
-            query = "SELECT id, username, created_at, email, pseudo FROM user WHERE id= {}".format(user_id)
-            if id == len(user_id) and cursor.execute(query) == 1:
-                return make_response(jsonify({'Message': 'OK', 'data': cursor.fetchone()}))
-            else:
-                return abort(404,  "Not found")
-
-    def put(self, user_id):
-        parser = reqparse.RequestParser()
-        parser.add_argument('username', type=str, help='Username to update user')
-        parser.add_argument('email', type=str, help='Email address to update user')
-        parser.add_argument('pseudo', type=str, help='Pseudo to update user')
-        parser.add_argument('password', type=str, help='Password to update user')
-        args = parser.parse_args()
-
-        _userUsername = args['username']
-        _userEmail = args['email']
-        _userPseudo = args['pseudo']
-        _userPassword = args['password']
-
-        if _userUsername and _userEmail and _userPassword and _userPassword is not None:
-            with db_connect.cursor() as newUser:
-                id = error.ifIsInt(user_id)
-                query = "UPDATE user set username = '{}', email = '{}', pseudo = '{}', password = '{}' where id = '{}'".format(_userUsername, _userEmail, _userPseudo, _userPassword, user_id)
-                if id == len(user_id) and newUser.execute(query) == 1:
-                    db_connect.commit()
-                    return self.get(user_id)
-                else:
-                    abort(404, "Not found")
-        else:
-            return error.ifIsNone(10001, "Veuillez à ne pas laisser les champs vides!")
-
-    def delete(self, user_id):
-        with db_connect.cursor() as user:
-            id = error.ifIsInt(user_id) # if all of chars is int, return the same len than user id
-            query = "DELETE from user where id = {}".format(user_id)
-            if id == len(user_id) and user.execute(query) == 1:
-                db_connect.commit()
-                return {}, 204
-            else:
-                abort(404, "Not found")
-
-
-class Authentification(Resource):
-    def post(self):
-        auth = reqparse.RequestParser()
-        auth.add_argument('username', type=str, required=True, help="user")
-        auth.add_argument('password', type=str, required=True, help="password")
-        args = auth.parse_args()
-
-        user = args['username']
-        passwd = args['password']
-        access_token = create_access_token(identity=user)
-        refresh_token = create_refresh_token(identity=user)
-        with db_connect.cursor() as authenti:
-            query = "SELECT id, username, created_at, email, pseudo FROM user WHERE username ='{}' and password='{}'".format(
-                user, passwd)
-            if authenti.execute(query) == 1:
-                db_connect.commit()
-                return make_response(
-                    jsonify({"Message": 'OK', 'data': {'token': access_token, 'user': authenti.fetchall()}}), 201)
-            else:
-                return error.ifIsNone(10001, "identifiant ou mot de passe invalide!")
-"""

@@ -11,3 +11,5 @@ flask-marshmallow
 flask_httpauth
 marshmallow-sqlalchemy 
 marshmallow
+pyopenssl
+flask_cors
