@@ -8,6 +8,8 @@ from models.video import video
 from models.auth import auth as auth
 import config
 
+
+
 logging.getLogger().setLevel(logging.INFO)
 
 # Get the current App with Configurations
@@ -20,6 +22,12 @@ CORS(app)
 @app.route('/')
 def home():
     return 'home route'
+
+
+# #erreur 401 JWT
+# @jwt.unauthorized_loader
+# def unauthorized_response(callback):
+#     return make_response(jsonify({'Message': 'Unauthorized'}), 401)
 
 
 # partie user
