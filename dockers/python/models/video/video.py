@@ -46,6 +46,7 @@ class Video(Resource):
         if error.ifToken(token_head) is True:
             if include.get_user_id_by_token(token_head) != include.get_user_id_by_video_id(video_id):
                 return error.forbidden()
+            include.delete_com_form_by_video_id(video_id)
             video = mod.Video.query.get(video_id)
             if video is not None:
                 mod.db.session.delete(video)

@@ -6,6 +6,8 @@ from models.users import user as user
 from models.comment import comment as comment
 from models.video import video
 from models.auth import auth as auth
+from flask import make_response
+from flask_jsonpify import jsonify
 import config
 
 
@@ -22,6 +24,12 @@ CORS(app)
 @app.route('/')
 def home():
     return 'home route'
+
+
+#error 404
+@app.errorhandler(404)
+def error_not_found(error):
+    return make_response(jsonify({'Message': 'Not found'}), 404)
 
 
 # #erreur 401 JWT

@@ -15,8 +15,9 @@ import include
 Return number of ints in user_id
 """
 
-
 def ifId_video(id_video):
+    if ifIsNum(id_video) is False:
+        return False
     vid = Video.query.get(id_video)
     if vid is not None:
         data = VideoSchema().dump(vid).data
@@ -26,6 +27,8 @@ def ifId_video(id_video):
 
 
 def ifId_comment(id_com):
+    if ifIsNum(id_com) is False:
+        return False
     com = Comment.query.get(id_com)
     if com is not None:
         data = CommentSchema().dump(com).data
@@ -57,6 +60,8 @@ def tchek_password(passwd):
 
 
 def ifId(id_user):
+    if ifIsNum(id_user) is False:
+        return False
     id = User.query.get(id_user)
     if id is not None:
         result = UserSchema().dump(id).data
@@ -71,7 +76,6 @@ def tchek_username(user):
         return "Cette username est déjà utilisé, "
     else:
         return ""
-
 
 
 def tchek_email(mail):
@@ -97,6 +101,20 @@ def ifToken(token_data):
         #if data['code'] == token_data:
         token = True
     return token
+
+
+def ifIsNum(id):
+    number =  ["0","1","2","3","4","5","6","7","8","9"]
+    leng = len(id)
+    lengn = len(number)
+    isInt = 0
+    for i in range(leng):
+        for n in range(lengn):
+            if id[i] == number[n]:
+                isInt = isInt + 1
+    if isInt == leng:
+        return True
+    return False
 
 
 def tchek_token_expiration(id_user):

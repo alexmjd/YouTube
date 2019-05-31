@@ -34,3 +34,24 @@ class VideoSchema(ma.Schema):
     class Meta:
         # Fields to expose
         fields = ('id', 'name', 'duration', 'user_id', 'source', 'created_at', 'view', 'enabled')
+
+
+class VideoFormat(db.Model):
+    __tablename__ = 'video_format'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    code = db.Column(db.String(45),  nullable=False)
+    uri = db.Column(db.String(45), nullable=False)
+    video_id= db.Column(db.Integer, nullable=False)
+
+    def __init__(self, code, uri, video_id):
+        self.code = code
+        self.uri = uri
+        self.video_id = video_id
+
+
+
+class VideoFormatSchema(ma.Schema):
+    class Meta:
+        # Fields to expose
+        fields = ('id', 'code', 'uri', 'video_id')

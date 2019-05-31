@@ -10,7 +10,8 @@ from flask_restful import reqparse
 import error
 from models.users.model import User, UserSchema
 from models.auth.model import Token, TokenSchema
-from models.video.model import Video, VideoSchema
+from models.video.model import Video, VideoSchema, VideoFormat, VideoFormatSchema
+from models.comment.model import Comment, CommentSchema
 from models.users import user
 
 import config
@@ -40,11 +41,8 @@ def get_user_by_id(user_id):
 def get_user_id_by_token(token):
     userId = Token.query.filter_by(code=token).first()
     if userId is not None:
-        print("not none")
         data = TokenSchema().dump(userId).data
-
         logging.info("INCLUDE MODULE :: PRINT DATA {} \n\n".format(data))
-
         return data['user_id']
     else:
         return False
@@ -121,8 +119,32 @@ def get_jwt():
 #prend le token dans le header
 def header():
     header = reqparse.RequestParser()
-    header.add_argument('token', type=str, location="headers", help="unauthorized")
+    header.add_argument('Authorization', type=str, location="headers", help="unauthorized")
     head = header.parse_args()
-    if head['token'] == '':
-        head['token'] = None
-    return head['token']
+    if head['Authorization'] == '':
+        head['Authorization'] = None
+    return head['Authorization']
+
+
+"""
+    DELETE
+"""
+
+#supp les infos utilisateur
+def delete_all_by_user_id(id_user):
+    vid = Video.query.filter_by(user_id=id_user).all()
+    for i in range(len(vid)):
+        data = VideoSchema(many=True).dump(vid).data
+        dat = data[i]
+        id = dat['id']
+        delete_com_form_by_video_id(id)
+    Video.query.filter_by(user_id=id_user).delete()
+    Comment.query.filter_by(user_id=id_user).delete()
+    db.session.commit()
+
+
+#supp les infos video
+def delete_com_form_by_video_id(id_video):
+    Comment.query.filter_by(video_id=id_video).delete()
+    VideoFormat.query.filter_by(video_id=id_video).delete()
+    db.session.commit()

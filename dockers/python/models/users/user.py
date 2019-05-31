@@ -106,6 +106,7 @@ class User(Resource):
         if error.ifToken(token_head) is True:
             if include.get_user_id_by_token(token_head) != int(user_id):
                return error.forbidden()
+            include.delete_all_by_user_id(user_id)
             include.delete_token(user_id)
             user = mod.User.query.get(user_id)
             if user is not None:
