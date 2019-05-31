@@ -92,6 +92,7 @@ class Video(Resource):
         else:
             return error.unauthorized()
 
+    """ ENCODING VIDEO """
     def patch(self, video_id):
         if error.ifId_video(video_id) is False:
             return error.notFound()
@@ -105,10 +106,14 @@ class Video(Resource):
             args = parser.parse_args()
 
             formatVideo = args['format'] if args['format'] else '480'
-            new_format = mod.Video_Format(formatVideo, 'test uri pour le moment', video_id, )
+            new_format = mod.VideoFormat(formatVideo, 'test uri pour le moment', video_id)
             mod.db.session.add(new_format)
             mod.db.session.commit()
-            result = video_schema.dump(new_format).data
+            retour_video_format = mod.VideoFormatSchema().dump(new_format).data
+
+            video = mod.Video.query.get(retour_video_format['video_id'])
+            result = video_schema.dump(video).data
+            logging.info("SHOW RESULT FROM VIDEO REQUEST :: {} \n\n".format(result))
             return make_response(jsonify({'Message': 'OK', 'data': result}), 201)
         else:
             return error.unauthorized()
