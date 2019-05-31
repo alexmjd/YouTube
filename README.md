@@ -1,15 +1,23 @@
 # YouTube
 Etna_Youtube_Api
 
-# Virtual env : 
+# How to use this API
+## Docker
+Install Docker 
+```
+run script regen.sh
+```
+## Usefull commands
+```docker ps``` : Show docker process
 
-## With python3, juste type:
-    python3 -m venv env
-This will create a new virtual environment named "env"
+```docker exec -it "nom_container" bash``` : Go into the selected container
 
-## To activate this one:
-    source env/bin/activate
-This will place you in the virtual env
+```docker logs "nom_container"``` : Show container logs
 
-## To get out:
-    deactivate
+```docker-compose up -d``` : run the docker-compose file
+
+## If you need to install new package, 2 choices :
+
+### Add the new package in file requirements.txt, Delete the docker image and rebuild it by launching the script regen.sh
+
+### Install the package with pip, then Use pip freeze > requirements.txt
