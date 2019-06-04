@@ -23,7 +23,6 @@ class Authentification(Resource):
             user_token = include.create_token()
             include.add_token(user_token, directly_id)
         else:
-            print("je suis al")
             user_token = include.get_token_by_user(directly_id)
         data = include.get_user_by_id(directly_id)
         if data != False:

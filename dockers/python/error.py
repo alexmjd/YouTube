@@ -132,14 +132,12 @@ def tchek_token_expiration(id_user):
     expir = Token.query.filter_by(user_id=id_user).first()
     if expir is not None:
         data = TokenSchema().dump(expir).data
-        print("ta mere il marche " + data['expired_at'])
         if data['expired_at'] < datetime.now().strftime("%Y-%m-%d %H:%M:%S"):
             include.delete_token(id_user)
             return True
         else:
             return False
     else:
-        print("ta mere")
         return True
 
 def isBool(v):
