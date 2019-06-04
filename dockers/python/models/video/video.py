@@ -17,14 +17,14 @@ class Videos(Resource):
         parser.add_argument('page', type=str)
         parser.add_argument('perPage', type=str)
         args = parser.parse_args()
-
+        ## user/duration a ajouter
         _name = args['name'] if args['name'] else ''
         _page = int(args['page']) if args['page'] and args['page'] is not "0" and args['page'].isdigit() else 1
         _perPage = int(args['perPage']) if args['perPage'] and args['perPage'] is not "0" and args[
             'perPage'].isdigit() else 50
 
         limit = _perPage * _page - _perPage
-        all_video = mod.Video.query.all()
+        all_video = mod.Video.query.filter(mod.Video.name.like('%' + _name + '%')).all()
         result = videos_schema.dump(all_video)
         result = result.data[limit:limit + _perPage]
         return make_response(jsonify({'Message ': 'OK', 'data': result, 'pager': {'current': _page, 'total': len(result)}}))

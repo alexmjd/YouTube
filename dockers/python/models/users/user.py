@@ -25,14 +25,13 @@ class Users(Resource):
 
         start_index = _perPage * _page - _perPage
 
-        all_users = mod.User.query.all()
+        all_users = mod.User.query.filter(mod.User.pseudo.like('%' + _userPseudo + '%')).all()
         result = users_schema.dump(all_users)
         result = result.data[start_index:start_index+_perPage]
         return make_response(jsonify({'Message ': 'OK', 'data': result, 'pager': {'current': _page, 'total': len(result)}}))
 
 
 class User(Resource):
-
     def get_timestamp(self):
         return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
 
