@@ -24,7 +24,10 @@ class Videos(Resource):
             'perPage'].isdigit() else 50
 
         limit = _perPage * _page - _perPage
-        all_video = mod.Video.query.filter(mod.Video.name.like('%' + _name + '%')).all()
+        if _name != "":
+            all_video = mod.Video.query.filter(mod.Video.name.like('%' + _name + '%')).all()
+        else:
+            all_video = mod.Video.query.all()
         result = videos_schema.dump(all_video)
         result = result.data[limit:limit + _perPage]
         return make_response(jsonify({'Message ': 'OK', 'data': result, 'pager': {'current': _page, 'total': len(result)}}))

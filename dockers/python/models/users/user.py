@@ -24,8 +24,10 @@ class Users(Resource):
         _perPage = int(args['perPage']) if args['perPage'] and args['perPage'] is not "0" and args['perPage'].isdigit() else 50
 
         start_index = _perPage * _page - _perPage
-
-        all_users = mod.User.query.filter(mod.User.pseudo.like('%' + _userPseudo + '%')).all()
+        if _userPseudo != "":
+            all_users = mod.User.query.filter(mod.User.pseudo.like('%' + _userPseudo + '%')).all()
+        else:
+            all_users = mod.User.query.all()
         result = users_schema.dump(all_users)
         result = result.data[start_index:start_index+_perPage]
         return make_response(jsonify({'Message ': 'OK', 'data': result, 'pager': {'current': _page, 'total': len(result)}}))
