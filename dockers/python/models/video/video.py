@@ -28,9 +28,21 @@ class Videos(Resource):
             all_video = mod.Video.query.filter(mod.Video.name.like('%' + _name + '%')).all()
         else:
             all_video = mod.Video.query.all()
+        
         result = videos_schema.dump(all_video)
         result = result.data[limit:limit + _perPage]
-        return make_response(jsonify({'Message ': 'OK', 'data': result, 'pager': {'current': _page, 'total': len(result)}}))
+        list = []
+        for row in result:
+            listTmp = {
+                'id': row['id'],
+                'source': row['source'],
+                'created_at': row['created_at'],
+                'view': row['view'],
+                'enabled': row['enabled'],
+                'user': include.get_user_by_id(row['user_id'])
+            }
+            list.append(listTmp)
+        return make_response(jsonify({'Message ': 'OK', 'data': list, 'pager': {'current': _page, 'total': len(result)}}))
 
     
 class Video(Resource):
@@ -38,6 +50,8 @@ class Video(Resource):
         if error.ifId_video(video_id) is not False:
             video = mod.Video.query.get(video_id)
             data = video_schema.dump(video).data
+            user = include.get_user_by_id(data['user_id'])
+            data.update({'user': user})
             return make_response(jsonify({'Message': 'OK', 'data': data}))
         else:
             return error.notFound()
