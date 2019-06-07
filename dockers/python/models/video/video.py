@@ -35,7 +35,9 @@ class Videos(Resource):
         for row in result:
             listTmp = {
                 'id': row['id'],
+                'name': row['name'],
                 'source': row['source'],
+                'duration': row['duration'],
                 'created_at': row['created_at'],
                 'view': row['view'],
                 'enabled': row['enabled'],
