@@ -1,13 +1,17 @@
 import logging
-from flask import request, make_response, jsonify
+from flask import request, make_response, jsonify, redirect, url_for
 from flask_restful import Resource,  reqparse
 from models.video import model as mod
 import error
 import include
 import upload
+import requests
+import config
 
 video_schema = mod.VideoSchema()
 videos_schema = mod.VideoSchema(many=True)
+
+logging.getLogger().setLevel(logging.INFO)
 
 
 class Videos(Resource):
@@ -159,6 +163,20 @@ class VideoByUser(Resource):
 
             _name = args['name']
             _source = uploader.upload_file()
+
+
+            test = TestReachDocker.get(self)
+            message = redirect('http://localhost:5000/testing', code=302)
+            #message = redirect(url_for('testing'))
+
+
+            logging.info("Message is :: {}".format(test))
+            logging.info("Message is :: {}".format(message))
+
+            if message is not None:
+                return make_response(jsonify({'Message', message}))
+            else:
+                return "KO"
             if _name and _source is not None and _name and _source is not "":
                 new_video = mod.Video(_name, 300, id_user, _source, 0, 1)
                 mod.db.session.add(new_video)
@@ -189,3 +207,12 @@ class VideosByUser(Resource):
         result = videos_schema.dump(all_video)
         result = result.data[limit:limit + _perPage]
         return make_response(jsonify({'Message ': 'OK', 'data': result, 'pager': {'current': _page, 'total': len(result)}}))
+
+class TestReachDocker(Resource):
+    def get(self, input_var):
+        url = config.DOCKER_ROUTE
+        res = requests.get(url, input_var)
+        dictFromServer = res.json()
+        logging.info("Print dict from server :: {} \n".format(dictFromServer))
+        return dictFromServer
+        return dictFromServer['message']

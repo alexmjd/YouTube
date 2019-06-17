@@ -11,7 +11,6 @@ ALLOWED_EXTENSIONS = set(['webm', 'mkv', 'flv', 'avi', 'mpg','mpeg', 'mov', 'wmv
 
 class Upload(Resource):
     def allowed_file(self, file_name):
-
         return '.' in file_name and file_name.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
     def upload_file(self):
@@ -27,7 +26,8 @@ class Upload(Resource):
                 if not os.path.exists(config.app.config['UPLOAD_FOLDER']):
                     os.mkdir(config.app.config['UPLOAD_FOLDER'])
                 file.save(os.path.join(config.app.config['UPLOAD_FOLDER'], filename))
-                return filename
+                filePath = config.app.config['UPLOAD_FOLDER'] + '/' + filename
+                return filePath
                 #return redirect(url_for('uploaded_file', filename=filename))
             else:
                 return make_response(jsonify({'Message':'something went wrong'}))

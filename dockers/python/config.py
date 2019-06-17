@@ -1,6 +1,5 @@
 import os
 import connexion
-#import app
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
@@ -13,6 +12,12 @@ connex_app = connexion.App(__name__, specification_dir=basedir)
 
 # Get the underlying Flask app instance
 app = connex_app.app
+
+# Params to join the encodocker
+DOCKER_NAME = 't_encoder'
+DOCKER_PORT = 5001
+DOCKER_FUNC = 'go'
+DOCKER_ROUTE = "http://{}:{}/{}".format(DOCKER_NAME, DOCKER_PORT, DOCKER_FUNC)
 
 # Configure the SQLAlchemy part of the app instance
 app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
