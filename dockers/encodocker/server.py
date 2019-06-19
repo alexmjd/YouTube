@@ -22,7 +22,7 @@ def test():
     test = encoder.testRoute()
     return jsonify({'message': 'toto is ok', 'retour fonction': test})
 
-apencode.add_resource(encoding.Encoding, '/go', methods=['GET'])
+apencode.add_resource(encoding.Encoding, '/go', methods=['GET', 'POST'])
 
 
 if __name__ == '__main__':

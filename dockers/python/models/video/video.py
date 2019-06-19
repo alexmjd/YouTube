@@ -164,17 +164,21 @@ class VideoByUser(Resource):
             _name = args['name']
             _source = uploader.upload_file()
 
+            # Redirection de la requête vers la route suivante
+            test = requests.get("http://localhost:5000/testing", data={'file': _source})
 
-            test = TestReachDocker.get(self)
-            message = redirect('http://localhost:5000/testing', code=302)
-            #message = redirect(url_for('testing'))
+            # Récupère le retour de la requête au format json
+            r = test.json()
 
+            logging.info("\nMessage is :: {}\n\n".format(r))
+            #logging.info("Message is :: {}".format(message))
 
-            logging.info("Message is :: {}".format(test))
-            logging.info("Message is :: {}".format(message))
-
-            if message is not None:
-                return make_response(jsonify({'Message', message}))
+            if test.status_code == 200:# is not None:
+                #print(test)
+                #x = test.json()
+                #logging.info("Message :: {}".format(x))
+                return r
+                #return make_response(jsonify({'Message', test}))
             else:
                 return "KO"
             if _name and _source is not None and _name and _source is not "":
@@ -209,10 +213,37 @@ class VideosByUser(Resource):
         return make_response(jsonify({'Message ': 'OK', 'data': result, 'pager': {'current': _page, 'total': len(result)}}))
 
 class TestReachDocker(Resource):
-    def get(self, input_var):
+    def get(self):
+        logging.info("WE ARE TESTING THE ROUTING")
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('file', help='Will be the uploaded file')
+        args = parser.parse_args()
+
+        logging.info("\n AFFICHAGE DU PARAM REÇU :: {}\n\n".format(args))
+
+        input_var = 5
         url = config.DOCKER_ROUTE
-        res = requests.get(url, input_var)
-        dictFromServer = res.json()
+        logging.info("\n\n\nPrint url from server :: {} \n\n".format(url))
+        input_json = {'arg':input_var}
+        
+        # Tests on GET
+        responseGet = requests.get(url, data=input_json)
+        logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n".format(responseGet.status_code, responseGet.reason))
+        
+        # Tests on POST
+        responsePost = requests.post(url=url, data=input_json)
+        test = responsePost.json()
+        logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n RESPONSE :: {}\n".format(responsePost.status_code, responsePost.reason, test))
+
+        #data = request.data
+
+        #logging.info("\n\n\nPrint res from server :: {} \n\n".format(res))
+        #logging.info("\n\n\nPrint data from server :: {} \n\n".format(truc))
+
+        #dictFromServer = res.json()
+        return make_response(jsonify(test))
+
         logging.info("Print dict from server :: {} \n".format(dictFromServer))
         return dictFromServer
         return dictFromServer['message']
