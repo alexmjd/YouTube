@@ -16,7 +16,7 @@ app = connex_app.app
 # Params to join the encodocker
 DOCKER_NAME = 't_encoder'
 DOCKER_PORT = 5001
-DOCKER_FUNC = 'go'
+DOCKER_FUNC = 'encoding'
 DOCKER_ROUTE = "http://{}:{}/{}".format(DOCKER_NAME, DOCKER_PORT, DOCKER_FUNC)
 
 # Configure the SQLAlchemy part of the app instance

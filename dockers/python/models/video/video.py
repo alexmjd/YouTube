@@ -215,27 +215,27 @@ class VideosByUser(Resource):
 class TestReachDocker(Resource):
     def get(self):
         logging.info("WE ARE TESTING THE ROUTING")
-
-        parser = reqparse.RequestParser()
-        parser.add_argument('file', help='Will be the uploaded file')
-        args = parser.parse_args()
-
-        logging.info("\n AFFICHAGE DU PARAM REÇU :: {}\n\n".format(args))
-
-        input_var = 5
+        
+        # Setting redirection
         url = config.DOCKER_ROUTE
-        logging.info("\n\n\nPrint url from server :: {} \n\n".format(url))
-        input_json = {'arg':input_var}
+
+        # Get parameters send by request
+        parser = reqparse.RequestParser()
+        parser.add_argument('file', type = str, help='Will be the uploaded file')
+        args = parser.parse_args()
+    
+        logging.info("\n AFFICHAGE DU PARAM REÇU :: {}\n\n".format(args))
         
         # Tests on GET
-        responseGet = requests.get(url, data=input_json)
-        logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n".format(responseGet.status_code, responseGet.reason))
+        responseGet = requests.get(url, data=args)
+        logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n RESPONSE :: {} \n".format(responseGet.status_code, responseGet.reason, responseGet.json()))
         
         # Tests on POST
-        responsePost = requests.post(url=url, data=input_json)
+        responsePost = requests.post(url, data=args)
         test = responsePost.json()
         logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n RESPONSE :: {}\n".format(responsePost.status_code, responsePost.reason, test))
 
+        return "1"
         #data = request.data
 
         #logging.info("\n\n\nPrint res from server :: {} \n\n".format(res))
