@@ -1,13 +1,17 @@
 import logging
-from flask import request, make_response, jsonify
+from flask import request, make_response, jsonify, redirect, url_for
 from flask_restful import Resource,  reqparse
 from models.video import model as mod
 import error
 import include
 import upload
+import requests
+import config
 
 video_schema = mod.VideoSchema()
 videos_schema = mod.VideoSchema(many=True)
+
+logging.getLogger().setLevel(logging.INFO)
 
 
 class Videos(Resource):
@@ -111,6 +115,7 @@ class Video(Resource):
         else:
             return error.unauthorized()
 
+    """ ENCODING VIDEO """
     def patch(self, video_id):
         if error.ifId_video(video_id) is False:
             return error.notFound()
@@ -124,10 +129,14 @@ class Video(Resource):
             args = parser.parse_args()
 
             formatVideo = args['format'] if args['format'] else '480'
-            new_format = mod.Video_Format(formatVideo, 'test uri pour le moment', video_id, )
+            new_format = mod.VideoFormat(formatVideo, 'test uri pour le moment', video_id)
             mod.db.session.add(new_format)
             mod.db.session.commit()
-            result = video_schema.dump(new_format).data
+            retour_video_format = mod.VideoFormatSchema().dump(new_format).data
+
+            video = mod.Video.query.get(retour_video_format['video_id'])
+            result = video_schema.dump(video).data
+            logging.info("SHOW RESULT FROM VIDEO REQUEST :: {} \n\n".format(result))
             return make_response(jsonify({'Message': 'OK', 'data': result}), 201)
         else:
             return error.unauthorized()
@@ -154,6 +163,24 @@ class VideoByUser(Resource):
 
             _name = args['name']
             _source = uploader.upload_file()
+
+            # Redirection de la requête vers la route suivante
+            test = requests.get("http://localhost:5000/testing", data={'file': _source})
+
+            # Récupère le retour de la requête au format json
+            r = test.json()
+
+            logging.info("\nMessage is :: {}\n\n".format(r))
+            #logging.info("Message is :: {}".format(message))
+
+            if test.status_code == 200:# is not None:
+                #print(test)
+                #x = test.json()
+                #logging.info("Message :: {}".format(x))
+                return r
+                #return make_response(jsonify({'Message', test}))
+            else:
+                return "KO"
             if _name and _source is not None and _name and _source is not "":
                 new_video = mod.Video(_name, 300, id_user, _source, 0, 1)
                 mod.db.session.add(new_video)
@@ -184,3 +211,39 @@ class VideosByUser(Resource):
         result = videos_schema.dump(all_video)
         result = result.data[limit:limit + _perPage]
         return make_response(jsonify({'Message ': 'OK', 'data': result, 'pager': {'current': _page, 'total': len(result)}}))
+
+class TestReachDocker(Resource):
+    def get(self):
+        logging.info("WE ARE TESTING THE ROUTING")
+        
+        # Setting redirection
+        url = config.DOCKER_ROUTE
+
+        # Get parameters send by request
+        parser = reqparse.RequestParser()
+        parser.add_argument('file', type = str, help='Will be the uploaded file')
+        args = parser.parse_args()
+    
+        logging.info("\n AFFICHAGE DU PARAM REÇU :: {}\n\n".format(args))
+        
+        # Tests on GET
+        responseGet = requests.get(url, data=args)
+        logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n RESPONSE :: {} \n".format(responseGet.status_code, responseGet.reason, responseGet.json()))
+        
+        # Tests on POST
+        responsePost = requests.post(url, data=args)
+        test = responsePost.json()
+        logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n RESPONSE :: {}\n".format(responsePost.status_code, responsePost.reason, test))
+
+        return "1"
+        #data = request.data
+
+        #logging.info("\n\n\nPrint res from server :: {} \n\n".format(res))
+        #logging.info("\n\n\nPrint data from server :: {} \n\n".format(truc))
+
+        #dictFromServer = res.json()
+        return make_response(jsonify(test))
+
+        logging.info("Print dict from server :: {} \n".format(dictFromServer))
+        return dictFromServer
+        return dictFromServer['message']

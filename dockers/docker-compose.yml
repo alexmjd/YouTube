@@ -34,5 +34,21 @@ services :
     networks:
       - default
 
+  encoder:
+    build:
+      context: ./encodocker
+      dockerfile: Dockerfile_encoder
+    image: encodocker:latest
+    container_name: t_encoder
+    #restart: always
+    depends_on:
+      - web
+    ports:
+      - "5001:5001"
+    volumes:
+    - ./encodocker/:/encoder/
+    networks:
+      - default
+
 networks:
   default:

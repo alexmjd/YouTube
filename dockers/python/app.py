@@ -49,10 +49,12 @@ api.add_resource(comment.Comments, '/video/<video_id>/comments', methods=['GET']
 api.add_resource(comment.CreateComments, '/video/<video_id>/comment', methods=['POST'])
 api.add_resource(comment.CommentById, '/comment/<comment_id>', methods=['GET'])
 
+api.add_resource(video.TestReachDocker, '/testing', methods=['GET', 'POST'])
 api.add_resource(video.Videos, '/videos', methods=['GET'])
 api.add_resource(video.Video, '/video/<video_id>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
 api.add_resource(video.VideosByUser, '/user/<user_id>/videos', methods=['GET'])
 api.add_resource(video.VideoByUser, '/user/<user_id>/video', methods=['POST'])
+
 
 
 # If we're running in stand alone mode, run the application
