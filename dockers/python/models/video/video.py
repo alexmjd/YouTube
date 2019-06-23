@@ -124,10 +124,29 @@ class Video(Resource):
             # En attendant le JWT, on fait avec le token simple !!!!
             if include.get_user_id_by_token(token_head) != include.get_user_id_by_video_id(video_id):
                 return error.forbidden()
-            parser = reqparse.RequestParser()
-            parser.add_argument('format', type=str, help='Name of the video')
-            args = parser.parse_args()
+            # parser = reqparse.RequestParser()
+            # parser.add_argument('format', type=str, help='Name of the video')
+            # args = parser.parse_args()
 
+                # Setting redirection
+            url = config.DOCKER_ROUTE
+
+            # Get parameters send by request
+            parser = reqparse.RequestParser()
+            parser.add_argument('file', type = str, help='Will be the uploaded file')
+            args = parser.parse_args()
+            
+            # Lauching request
+            response = requests.post(url, data=args)
+            encoded_video = response.json()
+            logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n RESPONSE :: {}\n".format(response.status_code, response.reason, encoded_video))
+
+            return make_response(jsonify({'Message': 'OK', 'data': encoded_video}), 201)
+
+            if response.status_code == 200:
+                return "ENCODING OK"
+            else:
+                return "ENCODING KO"
             formatVideo = args['format'] if args['format'] else '480'
             new_format = mod.VideoFormat(formatVideo, 'test uri pour le moment', video_id)
             mod.db.session.add(new_format)
@@ -164,24 +183,27 @@ class VideoByUser(Resource):
             _name = args['name']
             _source = uploader.upload_file()
 
-            # Redirection de la requête vers la route suivante
-            test = requests.get("http://localhost:5000/testing", data={'file': _source})
+            header = {'Authorization':token_head}
 
-            # Récupère le retour de la requête au format json
-            r = test.json()
+            # Redirect to the patch route to encode video
+            response = requests.patch("http://localhost:5000/video/{}".format(user_id), data = {'file':_source}, headers=header)
+            
+            # Get request response and encoding into json
+            encoding_response = response.json()
 
-            logging.info("\nMessage is :: {}\n\n".format(r))
-            #logging.info("Message is :: {}".format(message))
-
-            if test.status_code == 200:# is not None:
-                #print(test)
-                #x = test.json()
-                #logging.info("Message :: {}".format(x))
-                return r
-                #return make_response(jsonify({'Message', test}))
+            """
+            Une fois que tous les paramétrages seront OK
+            il faudra retirer cette condition pour celle du dessous
+            """
+            if response.status_code == 201:
+                return encoding_response
             else:
+                logging.info("\nPRINTING RESPONSE CODE :: {}\n".format(response.status_code))
                 return "KO"
-            if _name and _source is not None and _name and _source is not "":
+
+
+
+            if _name and _source is not None and _name and _source is not "" and response.status_code == 201:
                 new_video = mod.Video(_name, 300, id_user, _source, 0, 1)
                 mod.db.session.add(new_video)
                 mod.db.session.commit()
@@ -211,39 +233,3 @@ class VideosByUser(Resource):
         result = videos_schema.dump(all_video)
         result = result.data[limit:limit + _perPage]
         return make_response(jsonify({'Message ': 'OK', 'data': result, 'pager': {'current': _page, 'total': len(result)}}))
-
-class TestReachDocker(Resource):
-    def get(self):
-        logging.info("WE ARE TESTING THE ROUTING")
-        
-        # Setting redirection
-        url = config.DOCKER_ROUTE
-
-        # Get parameters send by request
-        parser = reqparse.RequestParser()
-        parser.add_argument('file', type = str, help='Will be the uploaded file')
-        args = parser.parse_args()
-    
-        logging.info("\n AFFICHAGE DU PARAM REÇU :: {}\n\n".format(args))
-        
-        # Tests on GET
-        responseGet = requests.get(url, data=args)
-        logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n RESPONSE :: {} \n".format(responseGet.status_code, responseGet.reason, responseGet.json()))
-        
-        # Tests on POST
-        responsePost = requests.post(url, data=args)
-        test = responsePost.json()
-        logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n RESPONSE :: {}\n".format(responsePost.status_code, responsePost.reason, test))
-
-        return "1"
-        #data = request.data
-
-        #logging.info("\n\n\nPrint res from server :: {} \n\n".format(res))
-        #logging.info("\n\n\nPrint data from server :: {} \n\n".format(truc))
-
-        #dictFromServer = res.json()
-        return make_response(jsonify(test))
-
-        logging.info("Print dict from server :: {} \n".format(dictFromServer))
-        return dictFromServer
-        return dictFromServer['message']

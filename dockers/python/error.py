@@ -105,10 +105,8 @@ def ifToken(token_data):
     token = False
     tok = Token.query.filter_by(code=token_data).first()
 
-    logging.info("MODULE ERROR ===> TOKEN :: {} \n\n".format(tok))
     if tok is not None:
         data = TokenSchema().dump(tok).data
-        logging.info("MODULE ERROR ===> TOKEN :: {} \n\n".format(data))
         #if data['code'] == token_data:
         token = True
     return token
