@@ -18,7 +18,7 @@ services :
     networks: 
       - default
       
-  web:
+  api:
     build:
       context: ./python
       dockerfile: Dockerfile_python
@@ -42,11 +42,26 @@ services :
     container_name: t_encoder
     #restart: always
     depends_on:
-      - web
+      - api
     ports:
       - "5001:5001"
     volumes:
     - ./encodocker/:/encoder/
+    networks:
+      - default
+    
+  web:
+    build:
+      context: ./vueker
+      dockerfile: Dockerfile_vue
+    image: nodocker:latest
+    container_name: t_node
+    depends_on:
+      - api
+    ports:
+      - "49160:8080"
+    volumes:
+    - ./vueker/:/user/src/app/
     networks:
       - default
 

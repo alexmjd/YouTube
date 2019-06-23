@@ -16,8 +16,10 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCog, faUser, faSignOutAlt, faTrashAlt, faCommentAlt, faPlusSquare, faSearch } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-import './style/custom.scss'
-import './style/main.scss'
+//import './style/custom.scss'
+//import './style/custom'
+//import './style/main.scss'
+//import './style/main'
 // import 'font-awesome/css/font-awesome.css'
 
 Vue.use(VueResource)
@@ -33,7 +35,8 @@ Vue.use(Vuex)
 //   next()
 // })
 
-Vue.http.options.root = 'http://127.0.0.1:5000'
+Vue.http.options.root = 'http://t_python:5000'
+//Vue.http.options.root = 'http://127.0.0.1:5000'
 
 Vue.http.interceptors.push(function(request, next) {
   next(function(response) {
@@ -71,7 +74,8 @@ Vue.http.interceptors.push(function(request, next) {
 
 
 export default Axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: 'http://t_python:5000',
+  //baseURL: 'http://localhost:5000',
   headers: {
     'Content-Type': 'application/json',
     'Authorization': localStorage.getItem('Authorization')
