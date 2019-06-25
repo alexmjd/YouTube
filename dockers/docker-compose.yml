@@ -65,5 +65,21 @@ services :
     networks:
       - default
 
+
+  mailer:
+    build:
+      context: ./mailer
+      dockerfile: Dockerfile_mailer
+    image: mailocker:last
+    container_name: t_mailer
+    depends_on:
+      - api
+    ports:
+      - "5005:5005"
+    volumes:
+    - ./mailer/:/home
+    networks: 
+      - default
+
 networks:
   default:
