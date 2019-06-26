@@ -4,19 +4,8 @@ WORKDIR     /home
 
 COPY        package*.json ./
 
-#RUN     #apt-get update && \
-        #apt-get install -y postfix
-#RUN     #apt-get install -y curl software-properties-common
-
-#RUN     #curl -sL https://deb.nodesource.com/setup_10.x | bash -
-
-#RUN     #apt-get install -y nodejs
-
 RUN     npm install
-        npm install express
-        npm install nodemailer
 
-#EXPOSE  5005:5002
 EXPOSE  5005:5005
 
-CMD     [npm", "start"]
+CMD     ["npm", "start"]
