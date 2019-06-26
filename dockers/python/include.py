@@ -65,6 +65,21 @@ def get_user_id_by_video_id(video_id):
     else:
         return False
 
+
+def get_format_by_video_id(video_id):
+    video_format_schema = VideoFormatSchema(many=True)
+
+    id = Video.query.get(video_id)
+    if id is not None:
+        all_format = VideoFormat.query.filter_by(video_id=video_id).all()
+        data = video_format_schema.dump(all_format).data
+        list = {}
+        for row in data:
+            list.update({row['code']: '1'})
+        return list
+    else:
+        return False
+
 """
     Authentification
 """

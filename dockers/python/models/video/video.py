@@ -21,7 +21,7 @@ class Videos(Resource):
         parser.add_argument('page', type=str)
         parser.add_argument('perPage', type=str)
         args = parser.parse_args()
-        ## user/duration a ajouter
+        ## duration a ajouter
         _name = args['name'] if args['name'] else ''
         _page = int(args['page']) if args['page'] and args['page'] is not "0" and args['page'].isdigit() else 1
         _perPage = int(args['perPage']) if args['perPage'] and args['perPage'] is not "0" and args[
@@ -57,7 +57,9 @@ class Video(Resource):
             video = mod.Video.query.get(video_id)
             data = video_schema.dump(video).data
             user = include.get_user_by_id(data['user_id'])
+            format = include.get_format_by_video_id(video_id)
             data.update({'user': user})
+            data.update({'format': format})
             return make_response(jsonify({'Message': 'OK', 'data': data}))
         else:
             return error.notFound()
