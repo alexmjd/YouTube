@@ -1,11 +1,13 @@
 var express = require('express');
+var jwt = require('jsonwebtoken')
 var bodyParser = require('body-parser');
+
 var app = express();
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, authorization");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     next();
 });
 app.use(bodyParser.json());
@@ -57,12 +59,33 @@ function send_mail(type, email)
     });
 }
 
-app.get('/send', function(req, res, next) {
+function verifyToken(req, res, next) {
+    const bearerHeaders = req.headers['authorization'];
+    console.log('bearerHeaders>>', bearerHeaders)
+
+    if (typeof bearerHeaders !== undefined) {
+        const bearerToken = bearerHeaders.split(' ')[1];
+        req.token = bearerToken
+        next();
+    } else {
+        console.log('verifyToken flaseeee >>>>>>>>>>>>>>>>>', bearerHeaders)
+        res.sendStatus(403);
+
+    }
+}
+
+app.get('/send', verifyToken , function(req, res, next) {
+
+    // jwt = jwt.replace('Bearer ','');
+    // var base64Url = jwt.split('.')[1];
+    // var decodedValue = JSON.parse(window.atob(base64Url));
+    console.log('jwt tokeeeeeeeeen >>', req.token)
     let data = req['body'];
     let type = data.type;
     let email = data.email;
-
+    
     send_mail(type, email);
+    
     res.send('ok');
 
 });
