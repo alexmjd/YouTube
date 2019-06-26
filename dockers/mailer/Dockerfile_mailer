@@ -1,11 +1,20 @@
-FROM        node:latest
+FROM        debian:latest
 
 WORKDIR     /home
 
 COPY        . /home
 
-RUN         apt-get update && \
-            apt-get install -y python3 python3-pip && \
-            apt-get install -y postfix
+RUN     apt-get update && \
+        apt-get install -y postfix
+RUN     apt-get install -y curl software-properties-common
 
-CMD         bash
+RUN     curl -sL https://deb.nodesource.com/setup_10.x | bash -
+
+RUN     apt-get install -y nodejs
+
+RUN     npm install express
+
+EXPOSE  5005:5002
+EXPOSE  5005:5005
+
+CMD     ["bash"]
