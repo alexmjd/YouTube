@@ -74,6 +74,7 @@ app.get('/', function(req, res, next) {
 
 app.get('/ok', function(req, res, next) {
     console.log("c'est relié")
+    console.log('data', req)
     //send_mail("password", "dy@ot.fr")
     res.send('ok')
 

@@ -156,8 +156,7 @@ def delete_com_form_by_video_id(id_video):
 import requests
 def send_email(type, email):
     your_data = {
-        type,
-        email
+        'type' : type,
+        'email' : email
     }
-    response = requests.get(url="http://t_mailer:5005/ok")
-    return "ok"
+    response = requests.get(url="http://t_mailer:5005/ok", json=your_data)
