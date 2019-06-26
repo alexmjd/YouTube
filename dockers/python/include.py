@@ -159,5 +159,5 @@ def send_email(type, email):
         type,
         email
     }
-    response = requests.get(url="http://locahost:5005", data=your_data)
-return response.json()
+    response = requests.get(url="http://t_mailer:5005/")
+    return response.json()
