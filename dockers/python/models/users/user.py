@@ -81,6 +81,7 @@ class User(Resource):
                 if _userEmail != "":
                     user.email = _userEmail
                 if _userPassword != "":
+                    include.send_email("password", user.email)
                     user.password = _userPassword
                 if _userPseudo != "":
                     user.pseudo = _userPseudo

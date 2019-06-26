@@ -148,3 +148,16 @@ def delete_com_form_by_video_id(id_video):
     Comment.query.filter_by(video_id=id_video).delete()
     VideoFormat.query.filter_by(video_id=id_video).delete()
     db.session.commit()
+
+
+"""
+    MAIL
+"""
+import requests
+def send_email(type, email):
+    your_data = {
+        type,
+        email
+    }
+    response = requests.get(url="http://locahost:5005", data=your_data)
+return response.json()
