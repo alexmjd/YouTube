@@ -159,4 +159,4 @@ def send_email(type, email):
         'type' : type,
         'email' : email
     }
-    response = requests.get(url="http://t_mailer:5005/ok", json=your_data)
+    response = requests.get(url="http://t_mailer:5005/send", json=your_data)

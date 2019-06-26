@@ -1,10 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-const cors = require('cors');
 var app = express();
-const axios = require('axios');
-//app.set('port', process.env.PORT || 5005 );
-// app.use(cors());
+
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
@@ -60,33 +57,19 @@ function send_mail(type, email)
     });
 }
 
-app.get('/', function(req, res, next) {
-    console.log("ok")
-    //send_mail("password", "dy@ot.fr")
-    //axios({url: 'http://t_python:5000/videos', method: 'GET'})
-    //    .then(resp => {
-     //       console.log('add resppppppp', resp.data.data)
-     //   })
-     //   .catch(err => {
-     //       console.log('errrrrrrrrr', err)
-     //   })
-});
+app.get('/send', function(req, res, next) {
+    let data = req['body'];
+    let type = data.type;
+    let email = data.email;
 
-app.get('/ok', function(req, res, next) {
-    console.log("c'est relié")
-    console.log('data', req)
-    //send_mail("password", "dy@ot.fr")
-    res.send('ok')
+    send_mail(type, email);
+    res.send('ok');
 
 });
-app.post('/te', function(req, res, next) {
-    console.log('cela marche ', res.data.data)
-    /* Notre code pour nodemailer */
-});
+
 app.use(function(req, res) {
     res.sendStatus(404);
 });
-
 
 // Print new emails to the console as they come in
 maildev.on('new', function(email){
