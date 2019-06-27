@@ -7,6 +7,7 @@ import include
 import upload
 import requests
 import config
+import rabbitSender
 
 video_schema = mod.VideoSchema()
 videos_schema = mod.VideoSchema(many=True)
@@ -187,25 +188,34 @@ class VideoByUser(Resource):
 
             header = {'Authorization':token_head}
 
+            rabb = rabbitSender.SenderClient()
+            logging.info("\nRABBIT IS CONNECTED ! \n")
+
+
+            logging.info("\n\nPrinting the source :: {}\n\n".format(_source))
+
+            response = rabb.call(_source)
+            #logging.info("Testing the sender rabbit :: {}".format(response))
+
             # Redirect to the patch route to encode video
-            response = requests.patch("http://localhost:5000/video/{}".format(user_id), data = {'file':_source}, headers=header)
+            #response = requests.patch("http://localhost:5000/video/{}".format(user_id), data = {'file':_source}, headers=header)
             
             # Get request response and encoding into json
-            encoding_response = response.json()
+            #encoding_response = response.json()
 
-            """
-            Une fois que tous les paramétrages seront OK
-            il faudra retirer cette condition pour celle du dessous
-            """
-            if response.status_code == 201:
-                return encoding_response
-            else:
-                logging.info("\nPRINTING RESPONSE CODE :: {}\n".format(response.status_code))
-                return "KO"
+            logging.info("\nPrinting response from rabbitMq\n")
+
+            # Starting to listen
+            #rabb.start()
+            
+            encoded = rabb.get_response_encoded()
 
 
+            logging.info("\n\nRABBIT GAVE THE MESSAGE !!! HALELUJAH \n\n\n")
 
-            if _name and _source is not None and _name and _source is not "" and response.status_code == 201:
+
+
+            if _name and _source is not None and _name and _source is not "":
                 new_video = mod.Video(_name, 300, id_user, _source, 0, 1)
                 mod.db.session.add(new_video)
                 mod.db.session.commit()

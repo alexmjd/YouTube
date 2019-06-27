@@ -1,0 +1,20 @@
+FROM        debian:latest
+
+WORKDIR     /home
+
+COPY        . /home
+
+RUN     apt-get update && \
+        apt-get install -y postfix
+RUN     apt-get install -y curl software-properties-common
+
+RUN     curl -sL https://deb.nodesource.com/setup_10.x | bash -
+
+RUN     apt-get install -y nodejs
+
+RUN     npm install express
+
+EXPOSE  5005:5002
+EXPOSE  5005:5005
+
+CMD     ["bash"]
