@@ -7,6 +7,7 @@ import include
 import upload
 import requests
 import config
+import rabbitSender
 
 video_schema = mod.VideoSchema()
 videos_schema = mod.VideoSchema(many=True)
@@ -185,12 +186,23 @@ class VideoByUser(Resource):
 
             header = {'Authorization':token_head}
 
+            rabb = rabbitSender.SenderClient()
+            logging.info("\nRABBIT IS CONNECTED ! \n")
+
+
+            logging.info("\n\nPrinting the source :: {}\n\n".format(_source))
+
+            response = rabb.call(_source)
+            #logging.info("Testing the sender rabbit :: {}".format(response))
+
             # Redirect to the patch route to encode video
-            response = requests.patch("http://localhost:5000/video/{}".format(user_id), data = {'file':_source}, headers=header)
+            #response = requests.patch("http://localhost:5000/video/{}".format(user_id), data = {'file':_source}, headers=header)
             
             # Get request response and encoding into json
-            encoding_response = response.json()
+            #encoding_response = response.json()
 
+
+            return "end request"
             """
             Une fois que tous les paramétrages seront OK
             il faudra retirer cette condition pour celle du dessous

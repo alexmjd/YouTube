@@ -13,3 +13,4 @@ marshmallow-sqlalchemy
 marshmallow
 pyopenssl
 flask_cors
+pika

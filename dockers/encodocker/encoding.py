@@ -57,23 +57,33 @@ class Encoding(Resource):
 
             conversion(input_file, newWidth, newHeight, outputName)
 
-    def post(self):
+    def post(self, file_source):
+
+        logging.info("\nLogging the result :: {}\n\t of type :: {}".format(file_source, type(file_source)))
 
         # Récupération des arguments de requête
-        parser = reqparse.RequestParser()
-        parser.add_argument('file', type = str, help = "file path")
-        args = parser.parse_args()
+        # parser = reqparse.RequestParser()
+        # parser.add_argument('file', type = str, help = "file path")
+        # args = parser.parse_args()
 
 
         # Need to send a stream message to unlock the other way
-        return make_response(jsonify({'message': 'ok', 'value': args['file']}))
+        #return make_response(jsonify({'message': 'ok', 'value': args['file']}))
         
         # Formattage des data
-        completePath = args['file']
+        #completePath = args['file']
+
+        #return 1
+        completePath = file_source
         path = completePath.split('/')[0]
         file = completePath.split('/')[-1]
+        fileName = file.split('.')[0]
         
-        probe = ffmpeg.probe(file)
+        logging.info("printing received file :: {}".format(file_source))
+
+        probe = ffmpeg.probe(file_source)
+
+        logging.info("\n\nPrinting probe :: {}\n".format(probe))
 
         outputName = ''
 
@@ -103,16 +113,31 @@ class Encoding(Resource):
         #Lance les copies de vidéos dans les résolutions plus basse        
         for value in range(startIndex+1, len(ratio)):
             quotient = ratio[value]
-            outputName = str(definition[value])+'p'
+            outputName = fileName+"_"+str(definition[value])+'p.mp4'
+
+            logging.info("\n\nOUTPUT NAME :: {}\n".format(outputName))
 
             newWidth = 4 * quotient if definition[value] == 480 or definition[value] == 240 else 16 * quotient
             newHeight = 3 * quotient if definition[value] == 480 or definition[value] == 240 else 9 * quotient
 
-            
+            logging.info(path+outputName)
             if width != 0 and height != 0:
-                #logging.info("\nTest index :: {}\t printing definition :: {}\t and value :: {}\n".format(startIndex, definition[startIndex], value))
-                os.system("ffmpeg -i {} -vf scale={}:{} -hide_banner {}.mp4".format(file, newWidth, newHeight, path+outputName))
-            
-        return make_response(jsonify({'message': 'ok', 'value': args['file']}))
+                    (
+                        ffmpeg.input(file_source)
+                        .filter('scale', w=newWidth, h=newHeight)
+                        .output(path+outputName,
+                                format='mp4',
+                                vcodec='libx264',
+                                crf=18,
+                                preset='veryslow',
+                                acodec='copy')
+                        .overwrite_output()
+                        .run()
+                    )
 
-        return make_response(jsonify({'message': ' OK', 'Method': 'POST'}))
+                #logging.info("\nTest index :: {}\t printing definition :: {}\t and value :: {}\n".format(startIndex, definition[startIndex], value))
+                #os.system("ffmpeg -i {} -vf scale={}:{} -hide_banner {}.mp4".format(file_source, newWidth, newHeight, path+outputName))
+            
+        #return make_response(jsonify({'message': 'ok', 'value': args['file']}))
+
+        #return make_response(jsonify({'message': ' OK', 'Method': 'POST'}))
