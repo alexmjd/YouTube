@@ -1,4 +1,5 @@
-const express = require('express'); const app = express();
+const express = require('express');
+const app = express();
 
 const elasticsearch = require('elasticsearch');
 
@@ -18,7 +19,7 @@ app.use(bodyParser.json());
 
 var client = new elasticsearch.Client( {
     hosts: [
-        'http://0.0.0.0:5011',
+        'http://localhost:9200',
     ]
 });
 
@@ -43,7 +44,7 @@ app.get('/update', function(req, res) {
                 else {
                     console.log("create", resp);
                     var bulk = [];
-                    axios({ url: 'http://t_python:5000/videos', method: 'GET' })
+                    axios({ url: 'http://0.0.0.0:5000/videos', method: 'GET' })
                         .then(resp => {
                             console.log('add resppppppp', resp.data.data)
                             data = resp.data.data
@@ -83,7 +84,7 @@ app.get('/search', function (req, res) {
           'bool': {
             'should': [
               { 'query_string': { 'query': "*"+req.query['q']+"*", 'fields': ['name'] }},
-              { 'quin ery_string': { 'query': req.query['q']+"~", 'fields': ['name'] }},
+              { 'query_string': { 'query': req.query['q']+"~", 'fields': ['name'] }},
               { 'multi_match': { 'query':  req.query['q'], 'fields': ['name'] }},
             ]
           }
@@ -105,8 +106,8 @@ app.get('/search', function (req, res) {
 
 })
 
-app.listen(5010, '0.0.0.0', function() {
-    console.log('Your node.js server is running on PORT: 5010');
+app.listen(app.get('port'), function() {
+    console.log('Your node.js server is running on PORT: ',app.get('port'));
 });
 
 module.exports = client;
