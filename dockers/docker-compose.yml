@@ -82,14 +82,32 @@ services :
     build:
       context: ./mailer
       dockerfile: Dockerfile_mailer
-    image: mailocker:last
+    image: mailocker:latest 
     container_name: t_mailer
     depends_on:
       - api
     ports:
       - "5005:5005"
+      - "5002:5005"
+      - "1080:1080"
+      - "1025:1025"
     volumes:
       - ./mailer/:/home
+    networks: 
+      - default
+
+  elastic:
+    build:
+      context: ./esdocker
+      dockerfile: Dockerfile_es
+    image: elasticker:latest
+    container_name: t_elastic
+    depends_on:
+      - api
+    ports:
+      - "5011:5011"
+    volumes:
+      - ./esdocker/:/home/
     networks: 
       - default
 

@@ -93,13 +93,13 @@ class Video(Resource):
                 return error.forbidden()
             parser = reqparse.RequestParser()
             parser.add_argument('name', type=str, help='Name of the video')
-            parser.add_argument('enable', type=bool, action='store_true', help='The video could be watched')
+            parser.add_argument('enable', type=int, action='store_true', help='The video could be watched')
             args = parser.parse_args()
 
             logging.info("Print ARGS :: {} \n\n".format(args))
 
             _name = args['name']
-            _enable = error.isBool(args['enable'])
+            _enable = args['enable']
 
             if _name is not None and _enable is not None:
                 video = mod.Video.query.get(video_id)
