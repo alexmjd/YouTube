@@ -84,5 +84,20 @@ services :
     networks: 
       - default
 
+  elastic:
+    build:
+      context: ./esdocker
+      dockerfile: Dockerfile_es
+    image: elasticker:latest
+    container_name: t_elastic
+    depends_on:
+      - api
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./esdocker/:/home/
+    networks: 
+      - default
+
 networks:
   default:
