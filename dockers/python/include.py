@@ -63,7 +63,8 @@ def get_user_id_by_video_id(video_id):
         data = VideoSchema().dump(id).data
         return data['user_id']
     else:
-        return False
+        return False   
+
 
 """
     Authentification
@@ -97,20 +98,26 @@ def create_token():
     user_token = secrets.token_urlsafe()
     return user_token
 
+
 """
     JWT
 """
 def create_JWT(username):
-    jwt_access_token = create_access_token(identity=username)
-    jwt_refresh_token = create_refresh_token(identity=username)
-    global jwt_token
-    jwt_token = jwt_access_token
+    user = User.query.filter_by(username=username).first()
+    if user is not None:
+        jwt_access_token = create_access_token(identity=username)
+        jwt_refresh_token = create_refresh_token(identity=username)
+        global jwt_token
+        jwt_token = jwt_access_token
+    else:
+        jwt_token = ''
 
 
 def get_jwt():
     global jwt_token
 
     return jwt_token
+
 
 """
     HEADER
@@ -154,10 +161,14 @@ def delete_com_form_by_video_id(id_video):
     MAIL
 """
 import requests
-def send_email(type, email):
+def send_email(type, email, username):
+    create_JWT(username)
+
+    jwt = get_jwt()
     your_data = {
-        type,
-        email
+        'type' : type,
+        'email' : email
     }
-    response = requests.get(url="http://t_mailer:5005/ok")
-    return "ok"
+    baerer = 'Bearer ' + jwt
+    headers = {'Authorization': baerer}
+    response = requests.get(url="http://t_mailer:5005/send", headers=headers, json=your_data)
