@@ -50,7 +50,7 @@ services :
       dockerfile: Dockerfile_encoder
     image: encodocker:latest
     container_name: t_encoder
-    #restart: always
+    restart: always
     depends_on:
       - rabbit
       - api

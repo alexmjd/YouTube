@@ -2,6 +2,7 @@ import os, logging, ffmpeg
 from flask_restful import Resource, reqparse
 from flask import make_response, request
 from flask_jsonpify import jsonify
+import receive
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -75,15 +76,15 @@ class Encoding(Resource):
 
         #return 1
         completePath = file_source
-        path = completePath.split('/')[0]
         file = completePath.split('/')[-1]
         fileName = file.split('.')[0]
+
+        # Path where videos will be store
+        path = '/home/videos/'+fileName+"/"
+
+        logging.info("\n\nPRINTING STORAGE PATH :: {}\n\n".format(path))
         
-        logging.info("printing received file :: {}".format(file_source))
-
         probe = ffmpeg.probe(file_source)
-
-        logging.info("\n\nPrinting probe :: {}\n".format(probe))
 
         outputName = ''
 
@@ -111,21 +112,31 @@ class Encoding(Resource):
                 break
 
         #Lance les copies de vidéos dans les résolutions plus basse        
-        for value in range(startIndex+1, len(ratio)):
+        for value in range(startIndex, len(ratio)):
             quotient = ratio[value]
             outputName = fileName+"_"+str(definition[value])+'p.mp4'
-
-            logging.info("\n\nOUTPUT NAME :: {}\n".format(outputName))
 
             newWidth = 4 * quotient if definition[value] == 480 or definition[value] == 240 else 16 * quotient
             newHeight = 3 * quotient if definition[value] == 480 or definition[value] == 240 else 9 * quotient
 
-            logging.info(path+outputName)
+            if not os.path.exists(path):
+                os.mkdir(path)
+
+
+            logging.info("\n\nVIDEO PATH :: {}\n\n".format(path+outputName))
+
+            # Basic concatenation
+            file_path = path+outputName
+
+            # Sending message to record the encoded video path
+            #receiver = receive.Consumer()
+            #receiver.responseQueue(file_path)
+            
             if width != 0 and height != 0:
                     (
                         ffmpeg.input(file_source)
                         .filter('scale', w=newWidth, h=newHeight)
-                        .output(path+outputName,
+                        .output(file_path,
                                 format='mp4',
                                 vcodec='libx264',
                                 crf=18,
@@ -134,6 +145,11 @@ class Encoding(Resource):
                         .overwrite_output()
                         .run()
                     )
+
+
+
+        # Send the mail
+
 
                 #logging.info("\nTest index :: {}\t printing definition :: {}\t and value :: {}\n".format(startIndex, definition[startIndex], value))
                 #os.system("ffmpeg -i {} -vf scale={}:{} -hide_banner {}.mp4".format(file_source, newWidth, newHeight, path+outputName))

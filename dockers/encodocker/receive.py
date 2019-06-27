@@ -6,11 +6,13 @@ logging.getLogger().setLevel(logging.INFO)
 
 class Consumer(object):
     def __init__(self):
-        logging.info("\n\nTEST CONNEXION FROM ENCODER\n\n")
 
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='t_rabbit', connection_attempts=5, retry_delay=10))
-
-        logging.info("\n\nConnexion OK")
+        # Setting connection, try every 10 seconds until 5 times if fail
+        self.connection = pika.BlockingConnection(
+                            pika.ConnectionParameters(
+                                host='t_rabbit',
+                                connection_attempts=5, 
+                                retry_delay=10))
 
         # Get the channel from the connexion
         self.channel = self.connection.channel()
@@ -60,6 +62,29 @@ class Consumer(object):
         # Launching the encoding
         encoder = encoding.Encoding()
         encoder.post(file_path)
+
+    def responseQueue(self, file_path):
+        self.encoding_queue = self.channel.queue_declare(queue='response_encoding')
+
+        self.response = None
+        #self.corr_id = str(uuid.uuid4())
+
+        # publish the first message which will wait for a response
+        # self.channel.basic_publish(
+        #     exchange='',
+        #     routing_key='response_encoding',
+        #     properties=pika.BasicProperties(
+        #         reply_to=self.encoding_queue,
+        #         correlation_id=self.corr_id,
+        #     ),
+        #     body=str(n))
+
+        logging.info("\n\nTYPE OF FILE_PATH :: {}\n\n".format(type(file_path)))
+
+        self.channel.basic_publish(
+                exchange='',
+                routing_key=self.encoding_queue,
+                body=file_path)
 
 
 

@@ -57,7 +57,27 @@ class SenderClient(object):
         # when the response was given, return the response message
         return self.response
 
+    def reception_callback(self, ch, method, properties, body):
+        logging,info("\n\n ON RETOUR CALLBACK :: {}\n\n".format(body))
 
+
+    def start(self):
+        self.channel.start_consuming()
+
+    def get_response_encoded(self):
+
+        logging.info("\n\nI NEED TO GET THE RABBIT RESPONSE \n\n")
+        # Declaring the queue
+        receive_queue = self.channel.queue_declare(queue='response_encoding')
+
+        logging.info("\n\nI NEED TO GET THE RABBIT RESPONSE 2\n\n")
+        # Setting the order of the process, here, define as first
+        self.channel.basic_qos(prefetch_count=2)
+
+        logging.info("\n\nI NEED TO GET THE RABBIT RESPONSE 3\n\n")
+        # Consuming the queue, on_message_callback represent the function which receive the message consumed in the queue
+        self.channel.basic_consume(queue=receive_queue.method.queue, auto_ack=True, on_message_callback=self.reception_callback)
+        logging.info("\n\nI NEED TO GET THE RABBIT RESPONSE 4\n\n")
 # sender = SenderClient()
 
 # print(" [x] Requesting fib(30)")
