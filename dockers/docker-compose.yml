@@ -93,7 +93,7 @@ services :
     depends_on:
       - api
     ports:
-      - "9200:9200"
+      - "5010:5010"
     volumes:
       - ./esdocker/:/home/
     networks: 
