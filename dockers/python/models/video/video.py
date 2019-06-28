@@ -123,8 +123,12 @@ class Video(Resource):
         if error.ifId_video(video_id) is False:
             return error.notFound()
         token_head = include.header()
+
+        logging.info("\n\n\nPRINTING TOKEN HEAD :: {}\t RESULT :: {}\n\n".format(token_head, error.ifToken(token_head)))
+        logging.info("\n\n\nPRINTING VIDEO ID :: {}\t RESULT :: {}\n\n".format(video_id, error.ifToken(token_head)))
         if error.ifToken(token_head) is True:
             # En attendant le JWT, on fait avec le token simple !!!!
+            logging.info("\n\n\nFIRST :: {}\t SECOND :: {}\n\n".format(include.get_user_id_by_token(token_head), include.get_user_id_by_video_id(video_id)))
             if include.get_user_id_by_token(token_head) != include.get_user_id_by_video_id(video_id):
                 return error.forbidden()
             # parser = reqparse.RequestParser()
@@ -188,50 +192,44 @@ class VideoByUser(Resource):
             rabb = rabbitSender.SenderClient()
             response = rabb.call(_source)
 
-
-            # Setting all paths to video_format
-            tmp_path = _source.split('.')[0]
-            output_path = ''
-
-            probe = ffmpeg.probe(_source)
-            height = 0
-            definition = [1080, 720, 480, 360, 240]            
-            for metadata in probe['streams']:
-                for (key, value) in metadata.items():
-                    if key == "height":
-                        height = value
-
-            logging.info("\n\nprinting source :: {} \t P {}\n\n".format(tmp_path, _source))
-
-            startIndex = 0
-
-            #Récupère l'index de départ par rapport à la vidéo input
-            for i in range(len(definition)):
-                if definition[i] == height:
-                    startIndex = i
-                    break
-
-
-            for value in range(startIndex, len(definition)):
-                file_format = str(definition[value])
-                output_path = tmp_path+"_"+file_format+'p.mp4'
-                logging.info("PRINTING OUTPUT FILE :: {}\t FILE FORMAT :: {} \n\n".format(output_path, file_format))
-                # Redirect to the patch route to encode video
-                patch_response = requests.patch("http://localhost:5000/video/{}".format(user_id), data = {'file':output_path, 'format':file_format}, headers=header)
-                if patch_response.status_code != 201:
-                    return error.badRequest(10010, "Something went wrong")
-
-            
-
-
-
-
-
             if _name and _source is not None and _name and _source is not "":
                 new_video = mod.Video(_name, 300, id_user, _source, 0, 1)
                 mod.db.session.add(new_video)
                 mod.db.session.commit()
                 result = video_schema.dump(new_video).data
+            
+                # Setting all paths to video_format
+                tmp_path = _source.split('.')[0]
+                output_path = ''
+
+                probe = ffmpeg.probe(_source)
+                height = 0
+                definition = [1080, 720, 480, 360, 240]            
+                for metadata in probe['streams']:
+                    for (key, value) in metadata.items():
+                        if key == "height":
+                            height = value
+
+                logging.info("\n\nprinting source :: {} \t P {}\n\n".format(tmp_path, _source))
+
+                startIndex = 0
+
+                #Récupère l'index de départ par rapport à la vidéo input
+                for i in range(len(definition)):
+                    if definition[i] == height:
+                        startIndex = i
+                        break
+
+
+                for value in range(startIndex, len(definition)):
+                    file_format = str(definition[value])
+                    output_path = tmp_path+"_"+file_format+'p.mp4'
+                    logging.info("PRINTING OUTPUT FILE :: {}\t FILE FORMAT :: {} \n\n".format(output_path, file_format))
+                    # Redirect to the patch route to encode video
+                    patch_response = requests.patch("http://localhost:5000/video/{}".format(result['id']), data = {'file':output_path, 'format':file_format}, headers=header)
+                    if patch_response.status_code != 201:
+                        return error.badRequest(10010, "Something went wrong")
+
                 return make_response(jsonify({'Message': 'OK', 'data': result}), 201)
             else:
                 return error.badRequest(10001, "Veuillez remplir tous les champs obligatoire!")

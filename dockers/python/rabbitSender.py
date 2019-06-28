@@ -12,7 +12,11 @@ class SenderClient(object):
         logging.info("\n\nTEST CONNEXION\n\n")
 
         # Get the connexion
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='t_rabbit'))
+        self.connection = pika.BlockingConnection(
+                            pika.ConnectionParameters(
+                                host='t_rabbit',
+                                connection_attempts=5, 
+                                retry_delay=10))
         
         logging.info("\n\nConnexion OK")
 
