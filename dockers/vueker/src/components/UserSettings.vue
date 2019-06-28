@@ -3,7 +3,7 @@
    <div :class="sx.set">
       <b-card bg-variant="transparent" style="height: 100vh;" no-body>
         <b-tabs pills card vertical nav-wrapper-class="col-2" active-nav-item-class="font-weight-bold">
-          <b-tab title="Profile" active>
+          <b-tab title="Profile" active @click="isPasswordForm=false">
             <b-card-text>
               <div style="width: 65%; margin: auto;">
                 <b-form @submit.prevent="handleSetUser">
@@ -37,8 +37,31 @@
             </b-card-text>
 
           </b-tab><br>
-          <b-tab title="Mot de Passe">
-            <b-card-text>Tab Contents 2</b-card-text>
+          <b-tab title="Mot de Passe" @click="isPasswordForm=true">
+            <b-card-text>
+              <div style="width: 65%; margin: auto;">
+                <b-form @submit.prevent="handleSetUser">
+                  <b-row class="my-3">
+                    <b-col sm="4">
+                      <label for="password">Nouveau mot de Passe :</label>
+                    </b-col>
+                    <b-col sm="8">
+                      <b-form-input id="password" type="password" v-model="user['password']" :state="validation" required></b-form-input>
+                      <b-form-invalid-feedback :state="validation"> Ton mot de passe doit contenir au moins 8 caractères. </b-form-invalid-feedback>
+                    </b-col>
+                  </b-row>
+                   <b-row class="my-3">
+                    <b-col sm="4">
+                      <label for="handlePassword">Confirme le nouveau mot de passe :</label>
+                    </b-col>
+                    <b-col sm="8">
+                      <b-form-input id="handlePassword" type="password" v-model="handlePassword" required></b-form-input>
+                    </b-col>
+                  </b-row>
+                <b-button v-if="validation" class="btn-principale px-4" type="submit" style="float: right;">Valider</b-button>
+                </b-form>
+              </div>
+            </b-card-text>
           </b-tab>
         </b-tabs>
         <div :class="sx.delete">
@@ -54,12 +77,10 @@ export default {
   data () {
     return {
       user: [],
-      types: [
-        'username',
-        'email',
-        'pseudo',
-        'password'
-      ]
+
+      error: false,
+      isPasswordForm: false,
+      handlePassword: ''
     }
   },
   mounted () {
@@ -73,34 +94,57 @@ export default {
   },
   methods: {
     handleSetUser() {
-      let payload = {
-        username: this.user.username,
-        email: this.user.email,
-        pseudo: this.user.pseudo,
-        password: this.user.password ? this.user.password : "",
-      }
-      this.$http.put('user/' + this.user.id , payload, { headers: {'Authorization': localStorage.getItem('Authorization')} }).then(response => {
-        // success toast
-        this.$bvToast.toast(`Vos données ont bien été prises en compte`, {
-          title: 'Success!',
-          solid: true,
-          variant: 'success',
-          autoHideDelay: 5000
-        })
-        const user = JSON.stringify(response.data.data);
-        localStorage.setItem('user', user)
-        this.$router.go(0);
-      }, (response) => {
-        // error toast
-        if(response.status != 403 && response.status != 401 && response.status != 404 ) {
-          this.$bvToast.toast(`Un problème est survenu`, {
+      if (this.isPasswordForm) {
+      console.log('handlePassword', this.handlePassword)
+      console.log('password', this.user.password)
+        if (this.handlePassword !== this.user.password) {
+          this.user.password = ''
+          this.handlePassword = ''
+          this.error = true
+          this.$bvToast.toast(`Les mots de passe ne sont pas identiques`, {
             title: 'Oops!',
             solid: true,
             variant: 'danger',
             autoHideDelay: 4000
           })
         }
-      })
+      } else {
+        this.user.password = ''
+        this.handlePassword = ''
+      }
+      let payload = {
+        username: this.user.username,
+        email: this.user.email,
+        pseudo: this.user.pseudo,
+        password: this.user.password ? this.user.password : '',
+      }
+      console.log('payload', payload)
+      if (!this.error) {
+        this.$http.put('user/' + this.user.id , payload, { headers: {'Authorization': localStorage.getItem('Authorization')} }).then(response => {
+          // success toast
+          this.$bvToast.toast(`Vos données ont bien été prise en compte`, {
+            title: 'Success!',
+            solid: true,
+            variant: 'success',
+            autoHideDelay: 5000
+          })
+          const user = JSON.stringify(response.data.data);
+          localStorage.setItem('user', user)
+          this.$router.go(0);
+        }, (response) => {
+          // error toast
+          if(response.status != 403 && response.status != 401 && response.status != 404 ) {
+            this.$bvToast.toast(`Un problème est survenu`, {
+              title: 'Oops!',
+              solid: true,
+              variant: 'danger',
+              autoHideDelay: 4000
+            })
+          }
+        })
+      }
+      this.error = false
+
     },
     handleLogout() {
       this.$store.dispatch('logout')

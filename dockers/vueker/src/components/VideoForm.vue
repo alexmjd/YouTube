@@ -99,7 +99,7 @@ import axios from 'axios'
         },
 
         updateIndexES() {
-          axios.get("http://localhost:5001/update")
+          axios.get("http://localhost:5010/update")
             .then(response => {
               console.log('get /update', response);
             })

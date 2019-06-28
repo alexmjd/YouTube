@@ -67,6 +67,14 @@ hr {
   opacity: 0.2;
   cursor: not-allowed!important;
 }
+
+iframe html body video{
+  width: 100%!important;
+
+}
+video {
+  width: 100%!important;
+}
 ////////////////////////////////////////////////////////////////////////////////
 /*@font-face {
 	font-family: "ProximaNova-Regular";

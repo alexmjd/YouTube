@@ -62,7 +62,7 @@ export default {
     getVideos() {
       this.isLoaded = false
 
-      axios.get("http://localhost:5001/search?q=" + this.query)
+      axios.get("http://localhost:5010/search?q=" + this.query)
       .then(response => {
         this.videos = response.data
         this.isLoaded = true
@@ -78,6 +78,11 @@ export default {
   }
 }
 </script>
+<style>
+video {
+  width: 100%!important;
+}
+</style>
 
 <style scoped lang="scss" module="sx">
 .list{

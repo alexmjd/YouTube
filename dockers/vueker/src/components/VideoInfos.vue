@@ -1,14 +1,18 @@
 <template>
   <div class="container-perso">
-    <div class="container">
+    <div class="container" v-if="isLoaded">
     <!-- <h4>Recommendation</h4> -->
       <div :class="sx.video">
         <div v-if="video.enabled == 1 || user.id == video.user_id">
-          <div :class="sx.info_video">
-            <div :class="sx.frame">
-              <b-img src="https://picsum.photos/600/300/?image=25" fluid alt="fluid imag"></b-img>
+          <div :class="sx.info_video" style="position: relative;">
+            <div :class="sx.frame" class="embed-responsive">
+                <!-- <b-embed aspect="16by9" type="iframe" class="embed-responsive-item"     src="https://www.youtube.com/embed/zpOULjyy-n8?rel=0" allowfullscreen ></b-embed> -->
+                <b-embed id="id_iframe"  ref="iframeContent"  aspect="16by9" type="iframe" class="embed-responsive-item" :src="urlVideo" allowfullscreen @load="iframeStyles"></b-embed>
             </div>
             <div :class="sx.title" style="display: flex; justify-content: space-between;">
+              <div style="position: absolute;top: 0px;right: 0;">
+                <b-form-select v-model="selectedFormat" :options="format" @change="generateNewUrl(video)"></b-form-select>
+              </div>
               <div>
                 <span> {{ video.name }} </span>
                 <div :class="sx.sub_title"> {{ video.view }} vues </div>
@@ -39,7 +43,7 @@
                 <b-button class="btn-principale px-4" type="submit" style="float: right;">Ajouter</b-button>
               </b-form>
             </div>
-            <div :class="sx.list_comments">
+            <div v-if="comments.length !== 0" :class="sx.list_comments">
               <div :class="sx.comments" v-for="comment in comments" :key="comment.id">
                 <div style="margin:auto;">
                   <div style="background: #f44336; width:40px; height:40px; border-radius: 2em;display: flex;"><font-awesome-icon icon="user" style="margin:auto;"/></div>
@@ -49,6 +53,12 @@
                   <div style="color: #ffffffe0; font-size: 1rem; font-weight: 400;"> {{ comment.body }} </div>
                 </div>
               </div>
+            </div>
+            <div v-else-if="isLoggedIn" :class="sx.list_comments">
+              Soyez le premier à commenter cette vidéo 🙃
+            </div>
+            <div v-else :class="sx.list_comments">
+              Pas de commentaire pour cette vidéo.. 😔 ( Connecte toi pour être le premier à poster un commentaire sous cette vidéo 😉)
             </div>
             <div class="pagination">
               <div>
@@ -81,14 +91,25 @@
         <div v-else> Vidéo indisponible.</div>
       </div>
     </div>
+    <div v-else class="container d-flex justify-content-center mb-3" style="height: 100%">
+      <strong style="margin-left: 0">Loading...</strong>
+      <b-spinner type="grow" label="Spinning" style="width: 3rem; height: 3rem; margin: auto; color:#3f51b5"></b-spinner>
+    </div>
   </div>
 </template>
 
 <script>
+import Media from '@dongido/vue-viaudio';
+
 export default {
   data () {
     return {
+      isLoaded: false,
+
       video: [],
+      urlVideo: '',
+      format: [],
+      selectedFormat: 240,
       comments: [],
       totalComments: [],
       user: [],
@@ -135,14 +156,60 @@ export default {
   },
 
   methods: {
+    // Just a method to append a simple style to video tag in iframe. yea..
+    iframeStyles() {
+        var iframe = document.getElementById('id_iframe')
+
+        var css = document.createElement('style');
+        css.type = 'text/css';
+
+        var styles = 'video {' +
+            'width: 100%;' +
+        '}';
+
+        css.appendChild(document.createTextNode(styles));
+
+        iframe.contentDocument.head.appendChild(css);
+    },
+
     getVideoById() {
+      this.isLoaded = false
+
       this.$http.get('video/' + this.$route.params.id).then(response => {
         // get data
         this.video = response.data.data
+        this.format = Object.keys(this.video.format)
+        this.selectedFormat = this.format[this.format.length - 1]
+        console.log('format', this.format)
+        this.getVideoUrl(this.video)
+        this.isLoaded = true
+        // console.log(' video', this.video)
       }, (response) => {
         // error callback
-        console.log('erreur', response)
+        this.isLoaded = true
+        console.log('erreur getVideoById()', response)
       })
+    },
+
+    getVideoUrl(video) {
+      if (video.source.includes(".")) {
+        // console.log('../assets/'+ this.selectedFormat + '/' + video.source)
+        this.urlVideo =  require('../assets/'+ this.selectedFormat + '/' + video.source)
+      } else {
+        this.urlVideo = require('../assets/240/unevideo.mp4')
+      }
+    },
+
+    generateNewUrl(video) {
+      var iframe = document.getElementById('id_iframe');
+      var innerDoc = iframe.contentDocument || iframe.contentWindow.document
+      var video_tag = innerDoc.getElementsByTagName('video')
+      video_tag[0].pause();
+      this.getVideoUrl(video)
+      setTimeout(function(){
+        video_tag[0].load();
+        video_tag[0].play();
+      }, 1000);
     },
 
     getComments() {
@@ -155,7 +222,7 @@ export default {
         this.comments = response.data.data
       }, (response) => {
         // error callback
-        console.log('erreur comments', response)
+        console.log('erreur getComments()', response)
       })
     },
 
@@ -183,6 +250,8 @@ export default {
             autoHideDelay: 4000
           })
         }
+        console.log('erreur createComment()', response)
+
       })
     },
 
@@ -203,7 +272,7 @@ export default {
     display: flex;
     margin: 25px 0;
 
-    .info_video .frame img{
+    .info_video .frame {
       width: 1000px;
       height: auto;
     }

@@ -9,9 +9,25 @@
 
 <script>
 import AppNavbar from "./components/Navbar";
+import axios from 'axios'
 
 export default {
-  components: { AppNavbar }
+  components: { AppNavbar },
+  mounted () {
+    this.updateIndexES()
+  },
+  methods: {
+    updateIndexES() {
+      console.log('updateIndexES in App.vue')
+      axios.get("http://localhost:5010/update")
+        .then(response => {
+          console.log('get /update', response);
+        })
+        .catch(err => {
+          console.log(err);
+        })
+    }
+  }
 };
 </script>
 

@@ -17,32 +17,57 @@
           </b-col>
         </b-row>
     </div>
-    <b-card bg-variant="transparent" style="height: 100vh;" no-body>
+    <b-card bg-variant="transparent" no-body>
       <b-tabs pills card vertical nav-wrapper-class="col-2" active-nav-item-class="font-weight-bold">
         <b-tab title="Mes vidéos" active>
           <div v-if="isLoaded" :class="sx.list" style="padding-bottom: 100px;">
-            <div v-for="video in videos" :key="video.id">
-              <div v-if="video.enabled == 1 || user.id == currentUser.id" :class="sx.video">
-                <b-card
-                  bg-variant="transparent"
-                  text-variant="white"
-                  img-src="https://picsum.photos/600/300/?image=25"
-                  img-top
-                  style="max-width: 20rem;"
-                  class="mb-2"
-                  :class="sx.clickable"
-                  @click="seeVideo(video.id)"
-                >
-                  <div class="notOnline" v-if="video.enabled == 0">
-                    <span>Cette vidéo n'est pas en ligne, seul vous pouvez la voir</span>
+            <div v-if="videos.length > 0" :class="sx.list" style="padding-bottom: 100px;">
+              <div v-for="video in videos" :key="video.id">
+                <div v-if="video.enabled == 1 || user.id == currentUser.id" :class="sx.video">
+                  <b-card
+                    bg-variant="transparent"
+                    text-variant="white"
+                    img-src="https://picsum.photos/600/300/?image=25"
+                    img-top
+                    style="max-width: 20rem;"
+                    class="mb-2"
+                    :class="sx.clickable"
+                    @click="seeVideo(video.id)"
+                  >
+                      <b-card-text style="width: 200px;"> {{ video.name }} </b-card-text>
+                      <b-card-text class="small text-white" >{{ video.view }} vues  •  {{ video.created_at | moment}}</b-card-text>
+                  </b-card>
+                  <div  v-if="user.id == currentUser.id" :class="sx.trash">
+                    <span class="deleteVideo" @click="deleteVideo(video.id)"><font-awesome-icon icon="trash-alt"/></span>
                   </div>
-                    <b-card-text style="width: 200px;"> {{ video.name }} </b-card-text>
-                    <b-card-text class="small text-white" >{{ video.view }} vues  •  {{ video.created_at | moment}}</b-card-text>
-                </b-card>
-                <div  v-if="user.id == currentUser.id" :class="sx.trash">
-                  <span class="deleteVideo" @click="deleteVideo(video.id)"><font-awesome-icon icon="trash-alt"/></span>
+                  <div  v-if="user.id == currentUser.id" :class="sx.engine">
+                    <span class="updateVideo" @click="showModal=true, selectedItem=video"><font-awesome-icon icon="cog"/></span>
+                  </div>
                 </div>
               </div>
+              <b-modal v-if="selectedItem" v-model="showModal" centered ok-only hide-header :body-class="sx.popup" :footer-class="sx.popup">
+                <p class="text-center m-0 lead"> <strong>{{ selectedItem.name }} </strong></p>
+                <div slot="modal-footer" class="w-100 text-center">
+                  <b-form class="m-3" :class="sx.videoForm" @submit.prevent="submitUpdateVideo(selectedItem)">
+                    <b-form-group id="input-group-1" label="Saisir le nouveau de la vidéo :" label-for="input-1">
+                      <b-form-input id="name" type="text" size="lg" v-model="newNameVideo" required placeholder="Nouveau nom de la vidéo" autofocus />
+                    </b-form-group>
+                    <b-form-group label="Mettre en ligne la video : ">
+                      <b-form-radio-group id="radio-group-2" v-model="selectedEnable" name="radio-sub-component">
+                        <b-form-radio name="radio-inline" value="1">Oui 😎</b-form-radio>
+                        <b-form-radio name="radio-inline" value="0">Non pas encore 🤔</b-form-radio>
+                      </b-form-radio-group>
+                    </b-form-group>
+                  <b-button variant="primary" class="btn-principale px-4" type="submit">Valider</b-button>
+                  <b-button variant="outline-secondary" @click="showModal=false">
+                    Fermer
+                  </b-button>
+                  </b-form>
+                </div>
+              </b-modal>
+            </div>
+            <div v-else>
+                Vous n'avez encore aucune vidéeo 😬
             </div>
           </div>
           <div v-else :class="sx.list" class="d-flex justify-content-center mb-3" style="height: 100%">
@@ -68,7 +93,13 @@ export default {
 
       videos: [],
       comments: [],
-      user: []
+      user: [],
+      selectedItem: [],
+      showModal: false,
+
+      newNameVideo : "",
+      selectedEnable: 1,
+
     }
   },
 
@@ -97,7 +128,7 @@ export default {
         this.isLoaded = true
       }, (response) => {
         // error callback
-        console.log('erreur', response)
+        console.log('erreur getVideosByUser', response)
       })
     },
 
@@ -107,7 +138,7 @@ export default {
         this.comments = response.data.data
       }, (response) => {
         // error callback
-        console.log('erreur comments', response)
+        console.log('erreur getComments', response)
       })
     },
 
@@ -115,7 +146,7 @@ export default {
       this.$http.get('user/' + this.$route.params.id).then(response => {
         this.user = response.data.data
       }, (response) => {
-        console.log('erreur', response)
+        console.log('erreur getUserById', response)
       })
     },
 
@@ -132,7 +163,6 @@ export default {
     },
 
     seeVideo(videoId) {
-      console.log('seeVideo', videoId)
       this.$router.push({ name: 'VideoInfos', params: { id: videoId }})
     },
 
@@ -156,12 +186,44 @@ export default {
             variant: 'danger',
             autoHideDelay: 4000
           })
+          console.log('erreur deleteVideo', response)
         })
       }
     },
 
+    submitUpdateVideo(video) {
+      this.isLoaded = false
+      let payload = {
+        name: this.newNameVideo,
+        enable: this.selectedEnable
+      }
+      console.log("payload", payload, video)
+      this.$http.put('video/' + video.id, payload, {headers: {'Authorization': localStorage.getItem('Authorization')}}).then(response => {
+        // success toast
+        this.$bvToast.toast(`Changement prit en compte !`, {
+          title: 'Succès!',
+          solid: true,
+          variant: 'success',
+          autoHideDelay: 5000
+        })
+        this.getVideosByUser()
+        this.updateIndexES()
+      }, (response) => {
+        // error toast
+        this.$bvToast.toast(`Veuillez réessayer`, {
+          title: 'Oops!',
+          solid: true,
+          variant: 'danger',
+          autoHideDelay: 4000
+        })
+        console.log('erreur submitUpdateVideo', response)
+      })
+      this.showModal = false;
+      this.newNameVideo = "";
+    },
+
     updateIndexES() {
-      axios.get("http://localhost:5001/update")
+      axios.get("http://localhost:5010/update")
         .then(response => {
           console.log('get /update', response);
         })
@@ -230,7 +292,28 @@ export default {
       cursor: pointer;
       color: #f44336;
     }
+
+    .engine {
+      position: absolute;
+      right: 20px;
+      bottom: 26px;
+    }
+    .engine:hover {
+      cursor: pointer;
+      color: #3f51b5;
+    }
   }
+
+    .popup {
+      border-top: none;
+    }
+    .modal.fade .modal-dialog {
+      opacity: 0;
+      transform: translate(0, 0);
+    }
+    .modal.show .modal-dialog {
+      opacity: 1;
+    }
 
   .notOnline {
     color: red;

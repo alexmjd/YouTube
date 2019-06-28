@@ -18,14 +18,19 @@
         </div>
       </div>
       <br/>
-      <div class="pagination">
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="totalUsers.length"
-          :per-page="perPage"
-          aria-controls="my-table"
-        ></b-pagination>
-      </div>
+       <div class="pagination">
+        <div>
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="totalUsers.length"
+            :per-page="perPage"
+            aria-controls="my-table"
+          ></b-pagination>
+        </div>
+          <div>
+            <b-form-select v-model="perPage" :options="options"></b-form-select>
+          </div>
+        </div>
     </div>
   </div>
 </template>
@@ -36,17 +41,27 @@ export default {
     return {
       users: [],
       totalUsers: [],
+
       pseudo: "",
       page: 1,
-      perPage: 3,
       currentPage: 1,
-      nbPages: 1
+      nbPages: 1,
+      perPage: '3',
+      options: [
+        { value: '3', text: '3' },
+        { value: '5', text: '5' },
+        { value: '25', text: '25' },
+        { value: '100', text: '100' }
+      ]
     }
   },
   watch: {
     currentPage: function () {
       // on Change page
       this.searchUser();
+    },
+    perPage: function () {
+      this.searchUser()
     }
   },
   mounted () {
@@ -78,10 +93,7 @@ export default {
       })
     },
     getNbPages() {
-      let payload = {
-        pseudo: this.pseudo,
-      }
-      this.$http.get('users', {params: payload}).then(response => {
+      this.$http.get('users').then(response => {
         this.totalUsers = response.data.data
         this.nbPages = Math.ceil(this.totalUsers.length / this.perPage);
       }, (response) => { })

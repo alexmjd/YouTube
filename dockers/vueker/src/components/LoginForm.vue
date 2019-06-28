@@ -50,13 +50,7 @@ export default {
     }
   },
   mounted () {
-     axios({ url: 'http://localhost:5000/videos', method: 'GET' })
-          .then(resp => {
-            console.log('resppppppp', resp)
-          })
-          .catch(err => {
-            console.log('errrrrrrrrr', err)
-          })
+
   },
   methods: {
 		handleLogin() {

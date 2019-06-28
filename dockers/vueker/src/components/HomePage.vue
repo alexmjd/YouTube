@@ -5,18 +5,22 @@
         <div v-for="video in videos" :key="video.id">
           <div v-if="video.enabled == 1" :class="sx.video" >
             <router-link :to="'/video/' + video.id">
-              <b-card
+              <div class="card" style="max-width: 20rem; background-color: transparent" >
+
+              <!-- <b-card
                 bg-variant="transparent"
                 text-variant="white"
-                img-src="../assets/goku.jpeg"
-                img-top
                 style="max-width: 20rem;"
                 class="mb-2"
                 :class="sx.clickable"
-              >
+              > -->
+                <video id="vid" class="card-img-top" style="max-height: 9.5rem;" :src="getVideoUrl(video)" muted stop></video>
+              <div class="card-body">
                 <b-card-text style="color: white;"> {{ video.name }} </b-card-text>
                 <b-card-text class="small" style="color: #bbb;">{{ video.user.username }} <br> {{ video.view }} vues  •  {{ video.created_at | moment}}</b-card-text>
-              </b-card>
+              <!-- </b-card> -->
+              </div>
+              </div>
             </router-link>
           </div>
         </div>
@@ -54,12 +58,12 @@ export default {
       body: "",
       currentPage: 1,
       perPage: '25',
-        options: [
-          { value: '5', text: '5' },
-          { value: '25', text: '25' },
-          { value: '100', text: '100' },
-          { value: '200', text: '200' },
-        ]
+      options: [
+        { value: '5', text: '5' },
+        { value: '25', text: '25' },
+        { value: '100', text: '100' },
+        { value: '200', text: '200' },
+      ]
     }
   },
 
@@ -94,6 +98,22 @@ export default {
         // error callback
         console.log('erreur', response)
       })
+    },
+
+    getVideoUrl(video) {
+      console.log('video <<<<<<<<<<<', video)
+      const src = video.source.replace('/home/','');
+      console.log('src <<<<<<<<<<<', src)
+
+      if (video.source.includes(".")) {
+        return require('../../../python/' + src)
+      } else {
+        return require('../assets/240/unevideo.mp4')
+      }
+
+      // document.getElementById('vid').addEventListener('loadedmetadata', function() {
+      //   this.currentTime = 50;
+      // }, false);
     },
 
     getNbPages() {

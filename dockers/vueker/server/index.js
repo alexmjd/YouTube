@@ -7,7 +7,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 
-app.set('port', process.env.PORT || 5001 );
+app.set('port', process.env.PORT || 5010 );
 // app.use(cors());
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -44,7 +44,7 @@ app.get('/update', function(req, res) {
                 else {
                     console.log("create", resp);
                     var bulk = [];
-                    axios({ url: 'http://localhost:5000/videos', method: 'GET' })
+                    axios({ url: 'http://0.0.0.0:5000/videos', method: 'GET' })
                         .then(resp => {
                             console.log('add resppppppp', resp.data.data)
                             data = resp.data.data
