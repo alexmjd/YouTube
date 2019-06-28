@@ -107,8 +107,6 @@ export default {
 
       if (video.source.includes(".")) {
         return require('../../../python/' + src)
-      } else {
-        return require('../assets/240/unevideo.mp4')
       }
 
       // document.getElementById('vid').addEventListener('loadedmetadata', function() {

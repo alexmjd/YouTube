@@ -192,11 +192,19 @@ export default {
     },
 
     getVideoUrl(video) {
+      // if (video.source.includes(".")) {
+      //   // console.log('../assets/'+ this.selectedFormat + '/' + video.source)
+      //   this.urlVideo =  require('../assets/'+ this.selectedFormat + '/' + video.source)
+      // } else {
+      //   this.urlVideo = require('../assets/240/unevideo.mp4')
+      // }
+
+      console.log('video <<<<<<<<<<<', video)
+      const src = video.source.replace('/home/','');
+      console.log('src <<<<<<<<<<<', src)
+
       if (video.source.includes(".")) {
-        // console.log('../assets/'+ this.selectedFormat + '/' + video.source)
-        this.urlVideo =  require('../assets/'+ this.selectedFormat + '/' + video.source)
-      } else {
-        this.urlVideo = require('../assets/240/unevideo.mp4')
+        this.urlVideo = require('../../../python/' + src)
       }
     },
 
