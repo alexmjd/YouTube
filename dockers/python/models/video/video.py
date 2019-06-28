@@ -1,4 +1,4 @@
-import logging
+import logging, ffmpeg
 from flask import request, make_response, jsonify, redirect, url_for
 from flask_restful import Resource,  reqparse
 from models.video import model as mod
@@ -33,7 +33,7 @@ class Videos(Resource):
             all_video = mod.Video.query.filter(mod.Video.name.like('%' + _name + '%')).all()
         else:
             all_video = mod.Video.query.all()
-        
+
         result = videos_schema.dump(all_video)
         result = result.data[limit:limit + _perPage]
         list = []
@@ -51,7 +51,7 @@ class Videos(Resource):
             list.append(listTmp)
         return make_response(jsonify({'Message ': 'OK', 'data': list, 'pager': {'current': _page, 'total': len(result)}}))
 
-    
+
 class Video(Resource):
     def get(self, video_id):
         if error.ifId_video(video_id) is not False:
@@ -132,26 +132,22 @@ class Video(Resource):
             # args = parser.parse_args()
 
                 # Setting redirection
-            url = config.DOCKER_ROUTE
+            #url = config.DOCKER_ROUTE
 
             # Get parameters send by request
             parser = reqparse.RequestParser()
-            parser.add_argument('file', type = str, help='Will be the uploaded file')
+            parser.add_argument('format', type = str, help='Will be the format of the uploaded file')
+            parser.add_argument('file', type = str, help='Will be the path of the uploaded file')
             args = parser.parse_args()
-            
+
             # Lauching request
-            response = requests.post(url, data=args)
-            encoded_video = response.json()
-            logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n RESPONSE :: {}\n".format(response.status_code, response.reason, encoded_video))
+            #response = requests.post(url, data=args)
+            #encoded_video = response.json()
+            #logging.info("\n\n LOGGING POST :: \n STATUS :: {}\n REASON :: {}\n RESPONSE :: {}\n".format(response.status_code, response.reason, encoded_video))
 
-            return make_response(jsonify({'Message': 'OK', 'data': encoded_video}), 201)
-
-            if response.status_code == 200:
-                return "ENCODING OK"
-            else:
-                return "ENCODING KO"
+            
             formatVideo = args['format'] if args['format'] else '480'
-            new_format = mod.VideoFormat(formatVideo, 'test uri pour le moment', video_id)
+            new_format = mod.VideoFormat(formatVideo, args['file'], video_id)
             mod.db.session.add(new_format)
             mod.db.session.commit()
             retour_video_format = mod.VideoFormatSchema().dump(new_format).data
@@ -188,30 +184,46 @@ class VideoByUser(Resource):
 
             header = {'Authorization':token_head}
 
+            # Got the response from the encoder by rabbit
             rabb = rabbitSender.SenderClient()
-            logging.info("\nRABBIT IS CONNECTED ! \n")
-
-
-            logging.info("\n\nPrinting the source :: {}\n\n".format(_source))
-
             response = rabb.call(_source)
-            #logging.info("Testing the sender rabbit :: {}".format(response))
 
-            # Redirect to the patch route to encode video
-            #response = requests.patch("http://localhost:5000/video/{}".format(user_id), data = {'file':_source}, headers=header)
+
+            # Setting all paths to video_format
+            tmp_path = _source.split('.')[0]
+            output_path = ''
+
+            probe = ffmpeg.probe(_source)
+            height = 0
+            definition = [1080, 720, 480, 360, 240]            
+            for metadata in probe['streams']:
+                for (key, value) in metadata.items():
+                    if key == "height":
+                        height = value
+
+            logging.info("\n\nprinting source :: {} \t P {}\n\n".format(tmp_path, _source))
+
+            startIndex = 0
+
+            #Récupère l'index de départ par rapport à la vidéo input
+            for i in range(len(definition)):
+                if definition[i] == height:
+                    startIndex = i
+                    break
+
+
+            for value in range(startIndex, len(definition)):
+                file_format = str(definition[value])
+                output_path = tmp_path+"_"+file_format+'p.mp4'
+                logging.info("PRINTING OUTPUT FILE :: {}\t FILE FORMAT :: {} \n\n".format(output_path, file_format))
+                # Redirect to the patch route to encode video
+                patch_response = requests.patch("http://localhost:5000/video/{}".format(user_id), data = {'file':output_path, 'format':file_format}, headers=header)
+                if patch_response.status_code != 201:
+                    return error.badRequest(10010, "Something went wrong")
+
             
-            # Get request response and encoding into json
-            #encoding_response = response.json()
-
-            logging.info("\nPrinting response from rabbitMq\n")
-
-            # Starting to listen
-            #rabb.start()
-            
-            encoded = rabb.get_response_encoded()
 
 
-            logging.info("\n\nRABBIT GAVE THE MESSAGE !!! HALELUJAH \n\n\n")
 
 
 

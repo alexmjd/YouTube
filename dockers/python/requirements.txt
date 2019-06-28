@@ -14,3 +14,4 @@ marshmallow
 pyopenssl
 flask_cors
 pika
+ffmpeg-python
