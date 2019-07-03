@@ -202,9 +202,13 @@ export default {
       console.log('video <<<<<<<<<<<', video)
       const src = video.source.replace('/home/','');
       console.log('src <<<<<<<<<<<', src)
+      const srcOUTMP4 = src.replace('.mp4','');
+      const srcVIDEO = srcOUTMP4.replace('videos/','');
+      console.log('src <<<<<<<<<<<', srcVIDEO)
 
       if (video.source.includes(".")) {
-        this.urlVideo = require('../../../python/' + src)
+        this.urlVideo = require('../../../python/' + srcOUTMP4 + '/' + srcVIDEO + '_' + this.selectedFormat + 'p.mp4')
+        // this.urlVideo = require('../../../python/' + src)
       }
     },
 
