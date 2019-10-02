@@ -227,6 +227,10 @@ class VideoByUser(Resource):
                     logging.info("PRINTING OUTPUT FILE :: {}\t FILE FORMAT :: {} \n\n".format(output_path, file_format))
                     # Redirect to the patch route to encode video
                     patch_response = requests.patch("http://localhost:5000/video/{}".format(result['id']), data = {'file':output_path, 'format':file_format}, headers=header)
+
+                    user = include.get_user_by_id(user_id)
+                    
+                    include.send_email("encoding", user.email, user.username)
                     if patch_response.status_code != 201:
                         return error.badRequest(10010, "Something went wrong")
 
